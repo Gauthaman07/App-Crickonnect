@@ -1,0 +1,2 @@
+D:/crickonnect/crickonnect/android/app/.cxx/RelWithDebInfo/u4024143/x86/CMakeFiles/edit_cache.dir
+D:/crickonnect/crickonnect/android/app/.cxx/RelWithDebInfo/u4024143/x86/CMakeFiles/rebuild_cache.dir

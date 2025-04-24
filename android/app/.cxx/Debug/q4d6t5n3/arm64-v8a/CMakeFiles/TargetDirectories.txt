@@ -1,0 +1,2 @@
+D:/crickonnect/crickonnect/android/app/.cxx/Debug/q4d6t5n3/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/crickonnect/crickonnect/android/app/.cxx/Debug/q4d6t5n3/arm64-v8a/CMakeFiles/rebuild_cache.dir
