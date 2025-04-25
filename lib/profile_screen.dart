@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './services/api_service.dart';
 import 'signin.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -71,7 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 isLoading
                     ? Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                        child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.red, // Main color for the arcs
+                          size: 40, // Size of the loader
+                        ),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

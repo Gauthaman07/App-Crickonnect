@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'signin.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -156,7 +157,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       child: isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
+                          ? LoadingAnimationWidget.threeArchedCircle(
+                              color: Colors.white, // Main color for the arcs
+                              size: 40, // Size of the loader
+                            )
                           : Text(
                               'Sign Up',
                               style: TextStyle(

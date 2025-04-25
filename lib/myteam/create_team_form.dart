@@ -106,7 +106,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Create Team"),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         elevation: 0,
       ),

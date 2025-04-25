@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart'; // Import your API service
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CreateTournamentScreen extends StatefulWidget {
   const CreateTournamentScreen({super.key});
@@ -199,7 +200,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: LoadingAnimationWidget.threeArchedCircle(
+                color: Colors.red, // Main color for the arcs
+                size: 40, // Size of the loader
+              ),
+            )
           : Form(
               key: _formKey,
               child: SingleChildScrollView(

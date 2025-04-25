@@ -366,4 +366,32 @@ class ApiService {
     print("Retrieved user ID from storage: $userId");
     return userId;
   }
+
+  Future<Map<String, dynamic>> registerTournament(
+      Map<String, dynamic> data) async {
+    final url = Uri.parse('$baseUrl/tournaments/register');
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("token");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to register: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      throw Exception('Error registering: $e');
+    }
+  }
 }

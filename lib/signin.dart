@@ -4,6 +4,8 @@ import './services/api_service.dart'; // Import the new API service
 import 'signup_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -184,7 +186,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                       ),
                       child: isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
+                          ? LoadingAnimationWidget.threeArchedCircle(
+                              color: Colors.white, // Main color for the arcs
+                              size: 40, // Size of the loader
+                            )
                           : Text(
                               'Sign In',
                               style: TextStyle(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'create_team_form.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class MyTeamPage extends StatefulWidget {
   const MyTeamPage({super.key});
@@ -77,7 +78,12 @@ class _MyTeamPageState extends State<MyTeamPage> {
       body: RefreshIndicator(
         onRefresh: fetchMyTeam,
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: LoadingAnimationWidget.threeArchedCircle(
+                  color: Colors.red, // Main color for the arcs
+                  size: 40, // Size of the loader
+                ),
+              )
             : errorMessage != null
                 ? Center(
                     child: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class GroundRequestTab extends StatefulWidget {
   const GroundRequestTab({super.key});
@@ -137,7 +138,20 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LoadingAnimationWidget.threeArchedCircle(
+                      color: Colors.red, // Main color for the arcs
+                      size: 40, // Size of the loader
+                    ),
+                    SizedBox(height: 16),
+                    Text('Processing request...',
+                        style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
               SizedBox(height: 16),
               Text('Processing request...'),
             ],
@@ -183,7 +197,12 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: LoadingAnimationWidget.threeArchedCircle(
+          color: Colors.red, // Main color for the arcs
+          size: 40, // Size of the loader
+        ),
+      );
     }
 
     if (pendingBookings.isEmpty && userBookings.isEmpty) {

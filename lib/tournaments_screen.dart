@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'create_tournament.dart'; // Import the create tournament screen
-import '/services/api_service.dart'; // Import the API service
+import 'create_tournament.dart';
+import '/services/api_service.dart';
+import 'register_tournament.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class TournamentsScreen extends StatefulWidget {
   const TournamentsScreen({super.key});
@@ -12,12 +14,11 @@ class TournamentsScreen extends StatefulWidget {
 
 class _TournamentsScreenState extends State<TournamentsScreen> {
   final ApiService _apiService = ApiService();
-  String selectedLocation = 'Tirupur'; // Default location set to Tirupur
+  String selectedLocation = 'Tirupur';
   List<dynamic> userTournaments = [];
   List<dynamic> otherTournaments = [];
   bool isLoading = false;
 
-  // List of locations
   final List<String> locations = [
     "Tirupur",
     "Coimbatore",
@@ -67,15 +68,42 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
       setState(() {
         selectedLocation = newLocation;
       });
-      _fetchTournaments(
-          selectedLocation); // Fetch tournaments for the new location
+      _fetchTournaments(selectedLocation);
     }
+  }
+
+  void showLocationSelector() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return ListView.builder(
+          itemCount: locations.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(locations[index]),
+              trailing: locations[index] == selectedLocation
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : null,
+              onTap: () {
+                Navigator.pop(context);
+                _onLocationChanged(locations[index]);
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(
           'Tournaments',
           style: TextStyle(
@@ -85,6 +113,7 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
           ),
         ),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -96,21 +125,33 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              // Dropdown for location selection
+
+              // 📍 Location Selector
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButton<String>(
-                  value: selectedLocation,
-                  onChanged: _onLocationChanged,
-                  items: locations.map((String location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(location),
-                    );
-                  }).toList(),
+                child: GestureDetector(
+                  onTap: showLocationSelector,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.red),
+                      const SizedBox(width: 5),
+                      Text(
+                        selectedLocation,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Icon(Icons.keyboard_arrow_down,
+                          color: Colors.black54),
+                    ],
+                  ),
                 ),
               ),
+
               const SizedBox(height: 16),
+
               if (userTournaments.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -167,6 +208,7 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
@@ -174,11 +216,21 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
               ),
+
               isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    )
                   : otherTournaments.isEmpty
                       ? Center(
                           child: Padding(
@@ -199,43 +251,60 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                           itemCount: otherTournaments.length,
                           itemBuilder: (context, index) {
                             final tournament = otherTournaments[index];
-                            return Card(
-                              color: Colors.white,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      tournament['tournamentName'] ??
-                                          'Unnamed Tournament',
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black,
-                                      ),
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        RegisterTournamentScreen(
+                                      tournamentId: tournament['_id'],
+                                      tournamentName:
+                                          tournament['tournamentName'],
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      tournament['location'] ??
-                                          'Unknown Location',
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                color: Colors.white,
+                                margin: const EdgeInsets.only(bottom: 16),
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        tournament['tournamentName'] ??
+                                            'Unnamed Tournament',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        tournament['location'] ??
+                                            'Unknown Location',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
                           },
                         ),
-              SizedBox(height: 80),
+
+              const SizedBox(height: 80),
             ],
           ),
         ),

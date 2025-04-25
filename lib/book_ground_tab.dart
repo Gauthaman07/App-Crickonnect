@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import './ground_details_screen.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class BookGroundTab extends StatefulWidget {
   const BookGroundTab({super.key});
@@ -101,7 +102,12 @@ class _BookGroundTabState extends State<BookGroundTab> {
           Expanded(
             child: isLoading
                 ? Center(
-                    child: CircularProgressIndicator()) // Simple circle loader
+                    child: LoadingAnimationWidget.threeArchedCircle(
+                      color: Colors.red, // Main color for the arcs
+                      size: 40, // Size of the loader
+                    ),
+                  )
+// Simple circle loader
                 : grounds.isEmpty
                     ? Center(child: Text("No grounds found"))
                     : ListView.builder(
