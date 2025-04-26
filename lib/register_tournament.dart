@@ -7,10 +7,10 @@ class RegisterTournamentScreen extends StatefulWidget {
   final String tournamentName;
 
   const RegisterTournamentScreen({
-    Key? key,
+    super.key,
     required this.tournamentId,
     required this.tournamentName,
-  }) : super(key: key);
+  });
 
   @override
   _RegisterTournamentScreenState createState() =>
@@ -70,23 +70,25 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
     }
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.grey[600]),
+      labelStyle: const TextStyle(color: Colors.grey), // Default label color
+      floatingLabelStyle:
+          const TextStyle(color: Colors.red), // Color when focused
       filled: true,
       fillColor: Colors.white,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.grey, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.grey, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.red, width: 2),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.grey, width: 1.5),
       ),
     );
   }
@@ -99,68 +101,101 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
           'Register  ',
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 18,
-            color: Colors.white,
+            fontSize: 16,
+            color: Colors.black,
           ),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.white,
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white, // Set the background color to white
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              // Title at the top
-              Text(
-                '${widget.tournamentName}', // Display tournament name dynamically
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              // Title at the top with margin
+              Padding(
+                padding: const EdgeInsets.only(top: 20), // Add top margin
+                child: Text(
+                  widget.tournamentName, // Display tournament name dynamically
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
               SizedBox(height: 20), // Space after title
               // Team Name input field
-              TextFormField(
-                decoration: _inputDecoration('Team Name', Icons.sports_cricket),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-                onChanged: (value) => teamName = value,
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // 90% of screen width
+                  child: TextFormField(
+                    decoration: _inputDecoration('Team Name'),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
+                    onChanged: (value) => teamName = value,
+                  ),
+                ),
               ),
-              SizedBox(height: 15),
-              // Captain Name input field
-              TextFormField(
-                decoration: _inputDecoration('Captain Name', Icons.person),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-                onChanged: (value) => captainName = value,
+              SizedBox(height: 20),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // 90% of screen width
+                  child: TextFormField(
+                    decoration: _inputDecoration('Captain Name'),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
+                    onChanged: (value) => captainName = value,
+                  ),
+                ),
               ),
-              SizedBox(height: 15),
-              // Contact Info input field
-              TextFormField(
-                decoration: _inputDecoration('Contact Info', Icons.phone),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-                onChanged: (value) => contactInfo = value,
+              SizedBox(height: 20),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // 90% of screen width
+                  child: TextFormField(
+                    decoration: _inputDecoration('Contact Info'),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
+                    onChanged: (value) => contactInfo = value,
+                  ),
+                ),
               ),
-              SizedBox(height: 15),
-              // Number of Players input field (optional)
-              TextFormField(
-                decoration: _inputDecoration(
-                    'Number of Players (optional)', Icons.group),
-                keyboardType: TextInputType.number,
-                onChanged: (value) => numberOfPlayers = value,
+              SizedBox(height: 20),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // 90% of screen width
+                  child: TextFormField(
+                    decoration:
+                        _inputDecoration('Number of Players (optional)'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => numberOfPlayers = value,
+                  ),
+                ),
               ),
-              SizedBox(height: 15),
-              // Preferred Slot input field (optional)
-              TextFormField(
-                decoration: _inputDecoration(
-                    'Preferred Slot (optional)', Icons.access_time),
-                onChanged: (value) => preferredSlot = value,
+              SizedBox(height: 20),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // 90% of screen width
+                  child: TextFormField(
+                    decoration: _inputDecoration('Preferred Slot (optional)'),
+                    onChanged: (value) => preferredSlot = value,
+                  ),
+                ),
               ),
-              SizedBox(height: 15),
+
+              SizedBox(height: 20),
               // Checkbox for rules agreement
               CheckboxListTile(
                 title: Text("I agree to the tournament rules"),
@@ -173,12 +208,34 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
               ),
               const SizedBox(height: 20),
               // Submit Button
-              ElevatedButton(
-                onPressed: isSubmitting ? null : _submitForm,
-                child: isSubmitting
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Submit'),
-              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: isSubmitting ? null : _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 16), // Only padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Submit',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                ),
+              )
             ],
           ),
         ),

@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
           "Crickonnect",
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 18,
+            fontSize: 16,
             // fontWeight: FontWeight.w800, // ExtraBold (800)
             color: Colors.black,
           ),

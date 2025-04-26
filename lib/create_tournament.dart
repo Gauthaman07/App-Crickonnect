@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../services/api_service.dart'; // Import your API service
+import '../services/api_service.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CreateTournamentScreen extends StatefulWidget {
@@ -16,22 +16,39 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   bool _isLoading = false;
   final ApiService _apiService = ApiService();
 
-  // Form fields
-  final _tournamentNameController = TextEditingController();
-  final _tournamentTypeController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _groundNameController = TextEditingController();
-  final _organizerNameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _numberOfTeamsController = TextEditingController();
-  final _oversPerMatchController = TextEditingController();
-  final _ballTypeController = TextEditingController();
-  final _entryFeeController = TextEditingController();
-  final _winningPrizeController = TextEditingController();
-  final _playerEligibilityController = TextEditingController();
-  final _teamCompositionController = TextEditingController();
+  // Constants to reduce string literals
+  static const _requiredFieldError = 'This field is required';
 
+  // Predefined styles to avoid recreating them
+  final _sectionTitleStyle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  final _buttonTextStyle = GoogleFonts.montserrat(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
+
+  // Form controllers - lazily initialized
+  late final TextEditingController _tournamentNameController;
+  late final TextEditingController _tournamentTypeController;
+  late final TextEditingController _locationController;
+  late final TextEditingController _groundNameController;
+  late final TextEditingController _organizerNameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _numberOfTeamsController;
+  late final TextEditingController _oversPerMatchController;
+  late final TextEditingController _ballTypeController;
+  late final TextEditingController _entryFeeController;
+  late final TextEditingController _winningPrizeController;
+  late final TextEditingController _playerEligibilityController;
+  late final TextEditingController _teamCompositionController;
+
+  // Form field values
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 7));
   DateTime _lastDateToRegister = DateTime.now().add(const Duration(days: 3));
@@ -41,15 +58,70 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   bool _umpireProvided = false;
   bool _autoFixtureGeneration = false;
 
-  final List<String> _matchDaysOptions = ['Weekends', 'Weekdays', 'Any Day'];
-  final List<String> _sessionOptions = [
+  // Options - made static const for better performance
+  static const List<String> _matchDaysOptions = [
+    'Weekends',
+    'Weekdays',
+    'Any Day'
+  ];
+  static const List<String> _sessionOptions = [
     'Morning',
     'Afternoon',
     'Evening',
     'Night'
   ];
-  final List<String> _tournamentTypeOptions = ['Knockout', 'League', 'Series'];
-  final List<String> _ballTypeOptions = ['Tennis', 'Leather', 'Hard Ball'];
+  static const List<String> _tournamentTypeOptions = [
+    'Knockout',
+    'League',
+    'Series'
+  ];
+  static const List<String> _ballTypeOptions = [
+    'Tennis',
+    'Red Leather',
+    'White Leather',
+    'Hard Ball'
+  ];
+
+  // Reusable decoration properties
+  late final BorderRadius _borderRadius;
+  late final OutlineInputBorder _normalBorder;
+  late final OutlineInputBorder _focusedBorder;
+
+  // DateFormat is expensive, create once
+  final _dateFormat = DateFormat('MMM dd, yyyy');
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize controllers
+    _tournamentNameController = TextEditingController();
+    _tournamentTypeController =
+        TextEditingController(text: _tournamentTypeOptions[0]);
+    _locationController = TextEditingController();
+    _groundNameController = TextEditingController();
+    _organizerNameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _emailController = TextEditingController();
+    _numberOfTeamsController = TextEditingController();
+    _oversPerMatchController = TextEditingController();
+    _ballTypeController = TextEditingController(text: _ballTypeOptions[0]);
+    _entryFeeController = TextEditingController();
+    _winningPrizeController = TextEditingController();
+    _playerEligibilityController = TextEditingController();
+    _teamCompositionController = TextEditingController();
+
+    // Initialize reusable UI elements
+    _borderRadius = BorderRadius.circular(8);
+    _normalBorder = OutlineInputBorder(
+      borderRadius: _borderRadius,
+      borderSide: BorderSide(color: Colors.grey[300]!),
+    );
+    _focusedBorder = OutlineInputBorder(
+      borderRadius: _borderRadius,
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    );
+  }
 
   @override
   void dispose() {
@@ -124,59 +196,66 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         _isLoading = true;
       });
 
-      // Create tournament data map
-      final tournamentData = {
-        'tournamentName': _tournamentNameController.text,
-        'tournamentType': _tournamentTypeController.text,
-        'location': _locationController.text,
-        'groundName': _groundNameController.text.isEmpty
-            ? null
-            : _groundNameController.text,
-        'organizerName': _organizerNameController.text,
-        'contactDetails': {
-          'phone': _phoneController.text.isEmpty ? null : _phoneController.text,
-          'email': _emailController.text.isEmpty ? null : _emailController.text,
-        },
-        'startDate': _startDate.toIso8601String(),
-        'endDate': _endDate.toIso8601String(),
-        'matchDaysPreference': _matchDaysPreference,
-        'sessionsAvailable': _sessionsAvailable,
-        'numberOfTeams': int.parse(_numberOfTeamsController.text),
-        'oversPerMatch': int.parse(_oversPerMatchController.text),
-        'ballType': _ballTypeController.text,
-        'entryFee': int.parse(_entryFeeController.text),
-        'winningPrize': _winningPrizeController.text.isEmpty
-            ? null
-            : _winningPrizeController.text,
-        'playerEligibility': _playerEligibilityController.text.isEmpty
-            ? null
-            : _playerEligibilityController.text,
-        'teamComposition': int.parse(_teamCompositionController.text),
-        'umpireProvided': _umpireProvided,
-        'lastDateToRegister': _lastDateToRegister.toIso8601String(),
-        'autoFixtureGeneration': _autoFixtureGeneration,
-      };
-
       try {
+        // Create tournament data map (moved inside try block for performance)
+        final tournamentData = {
+          'tournamentName': _tournamentNameController.text,
+          'tournamentType': _tournamentTypeController.text,
+          'location': _locationController.text,
+          'groundName': _groundNameController.text.isEmpty
+              ? null
+              : _groundNameController.text,
+          'organizerName': _organizerNameController.text,
+          'contactDetails': {
+            'phone':
+                _phoneController.text.isEmpty ? null : _phoneController.text,
+            'email':
+                _emailController.text.isEmpty ? null : _emailController.text,
+          },
+          'startDate': _startDate.toIso8601String(),
+          'endDate': _endDate.toIso8601String(),
+          'matchDaysPreference': _matchDaysPreference,
+          'sessionsAvailable': _sessionsAvailable,
+          'numberOfTeams': int.parse(_numberOfTeamsController.text),
+          'oversPerMatch': int.parse(_oversPerMatchController.text),
+          'ballType': _ballTypeController.text,
+          'entryFee': int.parse(_entryFeeController.text),
+          'winningPrize': _winningPrizeController.text.isEmpty
+              ? null
+              : _winningPrizeController.text,
+          'playerEligibility': _playerEligibilityController.text.isEmpty
+              ? null
+              : _playerEligibilityController.text,
+          'teamComposition': int.parse(_teamCompositionController.text),
+          'umpireProvided': _umpireProvided,
+          'lastDateToRegister': _lastDateToRegister.toIso8601String(),
+          'autoFixtureGeneration': _autoFixtureGeneration,
+        };
+
         // Call API service to create tournament
-        final response = await _apiService.createTournament(tournamentData);
+        await _apiService.createTournament(tournamentData);
 
         // Success handling
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tournament created successfully!')),
-        );
-
-        // Navigate back
-        Navigator.pop(context);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tournament created successfully!')),
+          );
+          Navigator.pop(context);
+        }
       } catch (e) {
         // Error handling
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating tournament: ${e.toString()}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Error creating tournament: ${e.toString()}')),
+          );
+        }
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -185,12 +264,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        backgroundColor: Colors.white,
+        title: const Text(
           'Create Tournament',
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 18,
-            // fontWeight: FontWeight.w800, // ExtraBold (800)
+            fontSize: 16,
             color: Colors.black,
           ),
         ),
@@ -199,11 +278,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+      backgroundColor: Colors.white,
       body: _isLoading
           ? Center(
               child: LoadingAnimationWidget.threeArchedCircle(
-                color: Colors.red, // Main color for the arcs
-                size: 40, // Size of the loader
+                color: Colors.red,
+                size: 40,
               ),
             )
           : Form(
@@ -218,34 +298,26 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       controller: _tournamentNameController,
                       label: 'Tournament Name',
                       hint: 'Enter tournament name',
-                      icon: Icons.emoji_events,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildDropdown(
                       label: 'Tournament Type',
-                      value: _tournamentTypeOptions[0],
+                      value: _tournamentTypeController.text,
                       items: _tournamentTypeOptions,
                       onChanged: (value) {
-                        setState(() {
-                          _tournamentTypeController.text = value!;
-                        });
+                        _tournamentTypeController.text = value!;
                       },
-                      icon: Icons.category,
                     ),
                     _buildTextField(
                       controller: _locationController,
                       label: 'Location',
                       hint: 'Enter tournament location',
-                      icon: Icons.location_on,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _groundNameController,
                       label: 'Ground Name (Optional)',
                       hint: 'Enter ground name',
-                      icon: Icons.stadium,
                     ),
                     const SizedBox(height: 16),
                     _buildSectionTitle('Organizer Information'),
@@ -253,44 +325,36 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       controller: _organizerNameController,
                       label: 'Organizer Name',
                       hint: 'Enter organizer name',
-                      icon: Icons.person,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _phoneController,
                       label: 'Phone (Optional)',
                       hint: 'Enter contact phone',
-                      icon: Icons.phone,
                       keyboardType: TextInputType.phone,
                     ),
                     _buildTextField(
                       controller: _emailController,
                       label: 'Email (Optional)',
                       hint: 'Enter contact email',
-                      icon: Icons.email,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
                     _buildSectionTitle('Schedule'),
                     _buildDatePicker(
                       label: 'Start Date',
-                      value: DateFormat('MMM dd, yyyy').format(_startDate),
+                      value: _dateFormat.format(_startDate),
                       onTap: () => _selectDate(context, 'start'),
-                      icon: Icons.calendar_today,
                     ),
                     _buildDatePicker(
                       label: 'End Date',
-                      value: DateFormat('MMM dd, yyyy').format(_endDate),
+                      value: _dateFormat.format(_endDate),
                       onTap: () => _selectDate(context, 'end'),
-                      icon: Icons.calendar_month,
                     ),
                     _buildDatePicker(
                       label: 'Last Date to Register',
-                      value: DateFormat('MMM dd, yyyy')
-                          .format(_lastDateToRegister),
+                      value: _dateFormat.format(_lastDateToRegister),
                       onTap: () => _selectDate(context, 'register'),
-                      icon: Icons.event_available,
                     ),
                     _buildDropdown(
                       label: 'Match Days Preference',
@@ -301,88 +365,57 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           _matchDaysPreference = value!;
                         });
                       },
-                      icon: Icons.date_range,
                     ),
                     const SizedBox(height: 16),
                     _buildSectionTitle('Sessions Available'),
-                    Wrap(
-                      spacing: 8,
-                      children: _sessionOptions.map((session) {
-                        return FilterChip(
-                          label: Text(session),
-                          selected: _sessionsAvailable.contains(session),
-                          onSelected: (selected) => _toggleSession(session),
-                          backgroundColor: Colors.grey[200],
-                          selectedColor: Colors.red[100],
-                          checkmarkColor: Colors.red,
-                          labelStyle: TextStyle(
-                            color: _sessionsAvailable.contains(session)
-                                ? Colors.red[800]
-                                : Colors.black,
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    _buildSessionsSelection(),
                     const SizedBox(height: 16),
                     _buildSectionTitle('Tournament Setup'),
                     _buildTextField(
                       controller: _numberOfTeamsController,
                       label: 'Number of Teams',
                       hint: 'Enter number of teams',
-                      icon: Icons.groups,
                       keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _oversPerMatchController,
                       label: 'Overs Per Match',
                       hint: 'Enter overs per match',
-                      icon: Icons.sports_cricket,
                       keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildDropdown(
                       label: 'Ball Type',
-                      value: _ballTypeOptions[0],
+                      value: _ballTypeController.text,
                       items: _ballTypeOptions,
                       onChanged: (value) {
-                        setState(() {
-                          _ballTypeController.text = value!;
-                        });
+                        _ballTypeController.text = value!;
                       },
-                      icon: Icons.sports_baseball,
                     ),
                     _buildTextField(
                       controller: _entryFeeController,
                       label: 'Entry Fee',
                       hint: 'Enter entry fee amount',
-                      icon: Icons.attach_money,
                       keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _winningPrizeController,
                       label: 'Winning Prize (Optional)',
                       hint: 'Enter winning prize details',
-                      icon: Icons.card_giftcard,
                     ),
                     _buildTextField(
                       controller: _playerEligibilityController,
                       label: 'Player Eligibility (Optional)',
                       hint: 'Enter eligibility criteria',
-                      icon: Icons.person_search,
                     ),
                     _buildTextField(
                       controller: _teamCompositionController,
                       label: 'Team Composition (players per team)',
                       hint: 'Enter number of players',
-                      icon: Icons.people,
                       keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val!.isEmpty ? 'This field is required' : null,
+                      validator: _requiredFieldValidator,
                     ),
                     const SizedBox(height: 16),
                     _buildSectionTitle('Additional Settings'),
@@ -396,7 +429,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           _umpireProvided = value;
                         });
                       },
-                      secondary: const Icon(Icons.sports),
+                      secondary: null, // Removed icon
                     ),
                     SwitchListTile(
                       title: const Text('Auto-Generate Fixtures'),
@@ -408,29 +441,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           _autoFixtureGeneration = value;
                         });
                       },
-                      secondary: const Icon(Icons.auto_awesome),
+                      secondary: null, // Removed icon
                     ),
                     const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Create Tournament',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    Center(
+                      // Centered the button
+                      child: _buildSubmitButton(),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -440,17 +456,14 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     );
   }
 
+  // Extracted common validator function
+  String? _requiredFieldValidator(String? val) =>
+      val!.isEmpty ? _requiredFieldError : null;
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: GoogleFonts.montserrat(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: Colors.red,
-        ),
-      ),
+      child: Text(title, style: _sectionTitleStyle),
     );
   }
 
@@ -458,37 +471,27 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required TextEditingController controller,
     required String label,
     required String hint,
-    required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
+    // Reuse the decoration for better performance
+    final decoration = InputDecoration(
+      labelText: label,
+      hintText: hint,
+      // Removed prefixIcon
+      border: _normalBorder,
+      enabledBorder: _normalBorder,
+      focusedBorder: _focusedBorder,
+      filled: true,
+      fillColor: Colors.grey[50],
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          prefixIcon: Icon(
-            icon,
-            color: Colors.grey[700],
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.red, width: 2),
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
-        ),
+        decoration: decoration,
         keyboardType: keyboardType,
         validator: validator,
       ),
@@ -500,7 +503,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required String value,
     required List<String> items,
     required void Function(String?) onChanged,
-    required IconData icon,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -515,22 +517,14 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: Colors.red),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.red, width: 2),
-          ),
+          // Removed prefixIcon
+          border: _normalBorder,
+          enabledBorder: _normalBorder,
+          focusedBorder: _focusedBorder,
           filled: true,
           fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         ),
       ),
     );
@@ -540,7 +534,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required String label,
     required String value,
     required VoidCallback onTap,
-    required IconData icon,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -549,21 +542,59 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            prefixIcon: Icon(icon, color: Colors.red),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
+            // Removed prefixIcon
+            border: _normalBorder,
+            enabledBorder: _normalBorder,
             filled: true,
             fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           ),
           child: Text(value),
         ),
+      ),
+    );
+  }
+
+  // Extracted method for sessions selection
+  Widget _buildSessionsSelection() {
+    return Wrap(
+      spacing: 8,
+      children: _sessionOptions.map((session) {
+        final isSelected = _sessionsAvailable.contains(session);
+        return FilterChip(
+          label: Text(session),
+          selected: isSelected,
+          onSelected: (selected) => _toggleSession(session),
+          backgroundColor: Colors.white, // Always white
+          selectedColor: Colors.white, // Even when selected, stays white
+          side: BorderSide(
+            color: isSelected ? Colors.red : Colors.grey, // Border changes
+            width: 1.5,
+          ),
+          checkmarkColor: Colors.red,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.red[800] : Colors.black,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Extracted method for submit button
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: 200, // Reduced width for smaller button
+      height: 45, // Slightly reduced height
+      child: ElevatedButton(
+        onPressed: _submitForm,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red,
+          shape: RoundedRectangleBorder(
+            borderRadius: _borderRadius,
+          ),
+        ),
+        child: Text('Create', style: _buttonTextStyle),
       ),
     );
   }

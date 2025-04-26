@@ -105,12 +105,19 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Team"),
-        backgroundColor: Colors.red,
+        title: const Text(
+          'Create Team',
+          style: TextStyle(
+            fontFamily: 'Boldonse',
+            fontSize: 16,
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Colors.white,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -177,8 +184,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                   controller: teamNameController,
                   decoration: InputDecoration(
                     labelText: 'Team Name',
-                    prefixIcon:
-                        Icon(Icons.sports_cricket, color: Colors.grey[600]),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -204,8 +209,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                   value: teamLocation,
                   decoration: InputDecoration(
                     labelText: 'Team Location',
-                    prefixIcon:
-                        Icon(Icons.location_on, color: Colors.grey[600]),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -270,7 +273,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     controller: groundNameController,
                     decoration: InputDecoration(
                       labelText: 'Ground Name',
-                      prefixIcon: Icon(Icons.stadium, color: Colors.grey[600]),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -286,8 +288,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     controller: groundDescController,
                     decoration: InputDecoration(
                       labelText: 'Ground Description',
-                      prefixIcon:
-                          Icon(Icons.description, color: Colors.grey[600]),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -305,7 +305,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     decoration: InputDecoration(
                       labelText: 'Google Map Link',
                       hintText: 'Paste Google Maps URL',
-                      prefixIcon: Icon(Icons.map, color: Colors.grey[600]),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -324,8 +323,6 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Ground Fees (₹ per hour)',
-                      prefixIcon:
-                          Icon(Icons.currency_rupee, color: Colors.grey[600]),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(

@@ -399,14 +399,18 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Session",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "Session",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
               buildSessionButton("Morning"),
               const SizedBox(width: 10),
               buildSessionButton("Afternoon"),
+              const SizedBox(width: 10),
+              buildSessionButton("Evening"), // Added Evening
             ],
           ),
         ],
@@ -427,6 +431,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                   : Colors.grey,
               width: 1, // Set border width to 1px
             ),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Center(
             child: Text(

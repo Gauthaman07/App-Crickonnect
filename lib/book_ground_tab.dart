@@ -80,6 +80,8 @@ class _BookGroundTabState extends State<BookGroundTab> {
           Padding(
             padding: EdgeInsets.all(10),
             child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.end, // Aligns content to the right
               children: [
                 GestureDetector(
                   onTap: showLocationSelector,
@@ -90,7 +92,9 @@ class _BookGroundTabState extends State<BookGroundTab> {
                       Text(
                         selectedLocation,
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Icon(Icons.keyboard_arrow_down, color: Colors.black54),
                     ],
