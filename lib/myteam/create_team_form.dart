@@ -34,7 +34,11 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
     'Restroom',
     'Parking',
     'Seating',
-    'Scoreboard'
+    'Scoreboard',
+    'Single End',
+    'Double End',
+    'Drinking Water',
+    'First Aid Kit',
   ];
   List<String> selectedFacilities = [];
 
@@ -221,13 +225,12 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     ),
                   ),
                   items: [
+                    'Tirupur',
+                    'Coimbatore',
                     'Chennai',
-                    'Mumbai',
-                    'Delhi',
-                    'Bangalore',
-                    'Hyderabad',
-                    'Kolkata',
-                    'Pune'
+                    'Salem',
+                    'Dindigul',
+                    'Trichy',
                   ]
                       .map((loc) =>
                           DropdownMenuItem(value: loc, child: Text(loc)))
@@ -359,10 +362,27 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                         final isSelected =
                             selectedFacilities.contains(facility);
                         return FilterChip(
-                          label: Text(facility),
+                          label: Text(
+                            facility,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.red
+                                  : Colors.black, // Red text if selected
+                            ),
+                          ),
                           selected: isSelected,
-                          selectedColor: Colors.red.withOpacity(0.2),
+                          backgroundColor:
+                              Colors.transparent, // No bg when not selected
+                          selectedColor:
+                              Colors.transparent, // No bg when selected
                           checkmarkColor: Colors.red,
+                          side: BorderSide(
+                            color: isSelected
+                                ? Colors.red
+                                : Colors
+                                    .grey.shade300, // Red border when selected
+                            width: 1.5,
+                          ),
                           onSelected: (bool selected) {
                             setState(() {
                               if (selected) {
@@ -375,7 +395,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                         );
                       }).toList(),
                     ),
-                  ),
+                  )
                 ],
 
                 SizedBox(height: 40),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '/services/api_service.dart';
 
 class RegisterTournamentScreen extends StatefulWidget {
@@ -209,31 +208,38 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
               const SizedBox(height: 20),
               // Submit Button
               Center(
-                child: ElevatedButton(
-                  onPressed: isSubmitting ? null : _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16), // Only padding
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 150, // Same width as your original button
+                  child: ElevatedButton(
+                    onPressed: isSubmitting ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16), // Only vertical padding
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            30), // 30 radius like original
+                      ),
+                      elevation: 5, // Added elevation
                     ),
-                  ),
-                  child: isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Submit',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                    child: isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'SUBMIT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               )
             ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'create_team_form.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class MyTeamPage extends StatefulWidget {
@@ -67,9 +66,9 @@ class _MyTeamPageState extends State<MyTeamPage> {
       appBar: AppBar(
         title: Text(
           "My Team",
-          style: GoogleFonts.montserrat(
-            fontSize: 24,
-            fontWeight: FontWeight.w800, // ExtraBold (800)
+          style: TextStyle(
+            fontFamily: 'Boldonse',
+            fontSize: 16,
             color: Colors.black,
           ),
         ),

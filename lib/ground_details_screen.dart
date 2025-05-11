@@ -186,7 +186,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
 
                     // Back button at top left with white background
                     Positioned(
-                      top: 25,
+                      top: 28,
                       left: 20,
                       child: Container(
                         decoration: BoxDecoration(
@@ -202,7 +202,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
 
                     // Share and favorite icons at top right
                     Positioned(
-                      top: 25,
+                      top: 28,
                       right: 20,
                       child: Row(
                         children: [
@@ -219,18 +219,18 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.favorite_border),
-                              onPressed: () {
-                                // Favorite functionality
-                              },
-                            ),
-                          ),
+                          // Container(
+                          //   decoration: BoxDecoration(
+                          //     color: Colors.white,
+                          //     shape: BoxShape.circle,
+                          //   ),
+                          //   child: IconButton(
+                          //     icon: Icon(Icons.favorite_border),
+                          //     onPressed: () {
+                          //       // Favorite functionality
+                          //     },
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

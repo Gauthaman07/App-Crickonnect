@@ -119,7 +119,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     );
     _focusedBorder = OutlineInputBorder(
       borderRadius: _borderRadius,
-      borderSide: const BorderSide(color: Colors.red, width: 2),
+      borderSide: const BorderSide(color: Colors.black, width: 2),
     );
   }
 
@@ -265,14 +265,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'Create Tournament',
-          style: TextStyle(
-            fontFamily: 'Boldonse',
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -289,15 +281,23 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           : Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Tournament Details'),
+                    const Text(
+                      'Create Tournament',
+                      style: TextStyle(
+                        fontFamily: 'Boldonse',
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     _buildTextField(
                       controller: _tournamentNameController,
                       label: 'Tournament Name',
-                      hint: 'Enter tournament name',
                       validator: _requiredFieldValidator,
                     ),
                     _buildDropdown(
@@ -311,36 +311,34 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                     _buildTextField(
                       controller: _locationController,
                       label: 'Location',
-                      hint: 'Enter tournament location',
+                      // hint: 'Enter tournament location',
                       validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _groundNameController,
                       label: 'Ground Name (Optional)',
-                      hint: 'Enter ground name',
+                      // hint: 'Enter ground name',
                     ),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('Organizer Information'),
+                    // const SizedBox(height: 16),
                     _buildTextField(
                       controller: _organizerNameController,
                       label: 'Organizer Name',
-                      hint: 'Enter organizer name',
+                      // hint: 'Enter organizer name',
                       validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _phoneController,
                       label: 'Phone (Optional)',
-                      hint: 'Enter contact phone',
+                      // hint: 'Enter contact phone',
                       keyboardType: TextInputType.phone,
                     ),
                     _buildTextField(
                       controller: _emailController,
                       label: 'Email (Optional)',
-                      hint: 'Enter contact email',
+                      // hint: 'Enter contact email',
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('Schedule'),
+                    // const SizedBox(height: 16),
                     _buildDatePicker(
                       label: 'Start Date',
                       value: _dateFormat.format(_startDate),
@@ -366,22 +364,20 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('Sessions Available'),
+                    // const SizedBox(height: 16),
                     _buildSessionsSelection(),
                     const SizedBox(height: 16),
-                    _buildSectionTitle('Tournament Setup'),
                     _buildTextField(
                       controller: _numberOfTeamsController,
                       label: 'Number of Teams',
-                      hint: 'Enter number of teams',
+                      // hint: 'Enter number of teams',
                       keyboardType: TextInputType.number,
                       validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _oversPerMatchController,
                       label: 'Overs Per Match',
-                      hint: 'Enter overs per match',
+                      // hint: 'Enter overs per match',
                       keyboardType: TextInputType.number,
                       validator: _requiredFieldValidator,
                     ),
@@ -396,29 +392,28 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                     _buildTextField(
                       controller: _entryFeeController,
                       label: 'Entry Fee',
-                      hint: 'Enter entry fee amount',
+                      // hint: 'Enter entry fee amount',
                       keyboardType: TextInputType.number,
                       validator: _requiredFieldValidator,
                     ),
                     _buildTextField(
                       controller: _winningPrizeController,
                       label: 'Winning Prize (Optional)',
-                      hint: 'Enter winning prize details',
+                      // hint: 'Enter winning prize details',
                     ),
                     _buildTextField(
                       controller: _playerEligibilityController,
                       label: 'Player Eligibility (Optional)',
-                      hint: 'Enter eligibility criteria',
+                      // hint: 'Enter eligibility criteria',
                     ),
                     _buildTextField(
                       controller: _teamCompositionController,
                       label: 'Team Composition (players per team)',
-                      hint: 'Enter number of players',
+                      // hint: 'Enter number of players',
                       keyboardType: TextInputType.number,
                       validator: _requiredFieldValidator,
                     ),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('Additional Settings'),
+                    // const SizedBox(height: 16),
                     SwitchListTile(
                       title: const Text('Umpire Provided'),
                       subtitle:
@@ -470,14 +465,14 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
-    required String hint,
+    // required String hint,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
     // Reuse the decoration for better performance
     final decoration = InputDecoration(
       labelText: label,
-      hintText: hint,
+      // hintText: hint,
       // Removed prefixIcon
       border: _normalBorder,
       enabledBorder: _normalBorder,
@@ -584,17 +579,26 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   // Extracted method for submit button
   Widget _buildSubmitButton() {
     return SizedBox(
-      width: 200, // Reduced width for smaller button
-      height: 45, // Slightly reduced height
+      width: 200,
+      height: 45,
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
+          foregroundColor: Colors.white, // Added foreground color
+          padding: EdgeInsets.symmetric(vertical: 16), // Added padding
           shape: RoundedRectangleBorder(
-            borderRadius: _borderRadius,
+            borderRadius: BorderRadius.circular(30), // Matching border radius
+          ),
+          elevation: 5, // Added elevation
+        ),
+        child: Text(
+          'CREATE',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
           ),
         ),
-        child: Text('Create', style: _buttonTextStyle),
       ),
     );
   }
