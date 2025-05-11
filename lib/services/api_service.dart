@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'token_manager.dart';
+import 'fcm_manager.dart';
 
 class ApiService {
   static const String baseUrl = "https://crikonnect-api.onrender.com/api";
@@ -16,12 +18,16 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
+        print("Login successful. Status code: ${response.statusCode}");
+        print("Response body: ${response.body}");
+
         final responseData = jsonDecode(response.body);
 
         // Save token in SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', responseData['token']);
-        await prefs.setBool('isLoggedIn', true);
+        // SharedPreferences prefs = await SharedPreferences.getInstance();
+        await AuthService.storeAuthToken(responseData['token']);
+        // await prefs.setBool('isLoggedIn', true);
+        await FcmTokenManager.initializeAndSendToken();
 
         return {"success": true, "token": responseData['token']};
       } else {
@@ -335,6 +341,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
+        print("Response body: ${response.body}");
         final Map<String, dynamic> data = json.decode(response.body);
         return {
           'userTournaments': data['userTournaments'] ?? [],
@@ -392,6 +399,43 @@ class ApiService {
     } catch (e) {
       print('API Exception: $e');
       throw Exception('Error registering: $e');
+    }
+  }
+
+  static Future<bool> updateFcmToken(String fcmToken) async {
+    try {
+      // Get the authentication token from SharedPreferences
+      String? token = await AuthService.getAuthToken();
+
+      if (token == null) {
+        print('No token found. User might not be logged in.');
+        return false;
+      }
+
+      // Prepare the request
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/fcm-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Using the same token format
+        },
+        body: jsonEncode({
+          'fcmToken': fcmToken,
+        }),
+      );
+
+      // Check response status
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('FCM token successfully sent to backend');
+        return true;
+      } else {
+        print('Failed to send FCM token. Status code: ${response.statusCode}');
+        print('Response: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error sending FCM token to backend: $e');
+      return false;
     }
   }
 }

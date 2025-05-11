@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "376030729446",
+    "project_id": "crickonnect-44667",
+    "storage_bucket": "crickonnect-44667.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376030729446:android:a80032b9070bf4673c1727",
+        "android_client_info": {
+          "package_name": "com.example.crickonnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaC6c7-09rr4_GRxjmpBI32jleYedsWaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
