@@ -1,0 +1,2 @@
+D:/CK APP/App-Crickonnect/android/app/.cxx/RelWithDebInfo/6d4q4l5w/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/CK APP/App-Crickonnect/android/app/.cxx/RelWithDebInfo/6d4q4l5w/armeabi-v7a/CMakeFiles/rebuild_cache.dir

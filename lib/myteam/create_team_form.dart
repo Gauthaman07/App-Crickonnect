@@ -69,7 +69,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
       "teamLocation": teamLocation,
       "hasOwnGround": hasOwnGround,
       // You'll need to handle image upload in your API service
-      // "teamLogo": _teamLogo,
+      "teamLogo": _teamLogo,
     };
 
     if (hasOwnGround) {

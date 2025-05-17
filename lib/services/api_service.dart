@@ -376,7 +376,9 @@ class ApiService {
 
   Future<Map<String, dynamic>> registerTournament(
       Map<String, dynamic> data) async {
-    final url = Uri.parse('$baseUrl/tournaments/register');
+    final String tournamentId = data['tournamentId'];
+    final url = Uri.parse('$baseUrl/tournaments/$tournamentId/registrations');
+
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("token");
 
