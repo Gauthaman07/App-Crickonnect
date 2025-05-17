@@ -299,6 +299,8 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
 
                 // Session Selector
                 buildSessionSelector(),
+
+                buildFacilitiesWidget(),
               ],
             ),
           ),
@@ -443,6 +445,50 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildFacilitiesWidget() {
+    final List<dynamic> facilities = widget.ground['facilities'] ?? [];
+
+    if (facilities.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          'No facilities listed for this ground.',
+          style: TextStyle(fontSize: 16, color: Colors.black54),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Facilities",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: facilities.map<Widget>((facility) {
+              return Chip(
+                label: Text(
+                  facility.toString(),
+                  style: const TextStyle(color: Colors.black87),
+                ),
+                backgroundColor: Colors.grey.shade200,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

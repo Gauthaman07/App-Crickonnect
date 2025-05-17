@@ -44,8 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!isButtonEnabled) return;
     setState(() => isLoading = true);
 
-    final String apiUrl =
-        "https://crikonnect-api-production.up.railway.app/api/auth/signup";
+    final String apiUrl = "https://crikonnect-api.onrender.com/api/auth/signup";
     final Map<String, dynamic> requestData = {
       "name": nameController.text,
       "mobile": mobileController.text,

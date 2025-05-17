@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'token_manager.dart';
 import 'fcm_manager.dart';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart';
+import 'package:mime/mime.dart';
 
 class ApiService {
   static const String baseUrl = "https://crikonnect-api.onrender.com/api";
@@ -92,22 +96,59 @@ class ApiService {
         return {"success": false, "message": "Authentication token is missing"};
       }
 
-      final response = await http.post(
-        Uri.parse("$baseUrl/team/create"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(teamData),
+      final uri = Uri.parse("$baseUrl/team/create");
+      final request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add text fields
+      request.fields['teamName'] = teamData['teamName'];
+      request.fields['location'] = teamData['teamLocation'];
+      request.fields['hasOwnGround'] = teamData['hasOwnGround'].toString();
+
+      if (teamData.containsKey('groundDetails')) {
+        final ground = teamData['groundDetails'];
+        request.fields['groundName'] = ground['groundName'];
+        request.fields['groundDescription'] = ground['groundDescription'];
+        request.fields['groundLocation'] = ground['groundLocation'];
+        request.fields['groundFees'] = ground['groundFees'];
+        List facilities = ground['groundFacilities'];
+        for (int i = 0; i < facilities.length; i++) {
+          request.fields['facilities[$i]'] = facilities[i];
+        }
+      }
+
+      // Add the image
+      final File logoFile = teamData['teamLogo'];
+      final mimeType = lookupMimeType(logoFile.path); // e.g. image/png
+      if (mimeType == null || !mimeType.startsWith('image/')) {
+        return {
+          "success": false,
+          "message": "Invalid image format. Please use JPG, JPEG, or PNG."
+        };
+      }
+
+      final mediaType =
+          MediaType.parse(mimeType); // Safe way to pass contentType
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'teamLogo',
+          logoFile.path,
+          contentType: mediaType,
+          filename: basename(logoFile.path),
+        ),
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return {"success": true, "message": "Team created successfully"};
       } else {
         return {
           "success": false,
           "message":
-              "Failed to create team. Status: ${response.statusCode}, Message: ${response.body}"
+              "Failed to create team. Status: ${response.statusCode}, Body: $responseBody"
         };
       }
     } catch (e) {

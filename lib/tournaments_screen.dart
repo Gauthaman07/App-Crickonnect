@@ -4,6 +4,8 @@ import 'create_tournament.dart';
 import '/services/api_service.dart';
 import 'register_tournament.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TournamentsScreen extends StatefulWidget {
   const TournamentsScreen({super.key});
@@ -190,7 +192,7 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
 
               // User Tournaments Section
               if (userTournaments.isNotEmpty) ...[
-                _buildSectionHeader('Your Tournaments'),
+                // _buildSectionHeader('Your Tournaments'),
                 _buildUserTournamentsList(),
                 const SizedBox(height: 16),
               ],
@@ -259,39 +261,147 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
       itemCount: userTournaments.length,
       itemBuilder: (context, index) {
         final tournament = userTournaments[index];
+
+        final String tournamentName =
+            tournament['tournamentName'] ?? 'Unnamed Tournament';
+        final String location = tournament['location'] ?? 'Unknown Location';
+        final DateTime startDate =
+            DateTime.tryParse(tournament['startDate'] ?? '') ?? DateTime.now();
+        final int totalTeams = tournament['numberOfTeams'] ?? 0;
+        final int registeredTeams = (tournament['teams'] as List?)?.length ?? 0;
+        final String tournamentType = tournament['tournamentType'] ?? '';
+        final int overs = tournament['oversPerMatch'] ?? 0;
+        final String? fixtureUrl = tournament['fixturePDFUrl'];
+
         return Card(
-          color: Colors.blue[50],
+          color: Colors.black,
           margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tournament['tournamentName'] ?? 'Unnamed Tournament',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.blue[800],
-                  ),
+                /// Top Row: Tournament Name & Date
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        tournamentName,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today,
+                            size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${startDate.day}/${startDate.month}/${startDate.year}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 13,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  tournament['location'] ?? 'Unknown Location',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
+
+                /// Location
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      location,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                /// Chips: Tournament Type and Overs
+                Row(
+                  children: [
+                    _buildInfoChip(tournamentType),
+                    const SizedBox(width: 8),
+                    _buildInfoChip('$overs Overs'),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                /// Bottom Row: Team Count & Fixture Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Teams: $registeredTeams / $totalTeams',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (fixtureUrl != null && fixtureUrl.isNotEmpty)
+                      GestureDetector(
+                        onTap: () async {
+                          final uri = Uri.parse(fixtureUrl);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Could not open fixture')),
+                            );
+                          }
+                        },
+                        child: Text(
+                          'View Fixture',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            color: Colors.lightBlueAccent,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildInfoChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey[850],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.montserrat(
+          fontSize: 12,
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 
