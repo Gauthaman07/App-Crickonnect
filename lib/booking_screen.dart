@@ -53,8 +53,8 @@ class _BookingScreenState extends State<BookingScreen> {
                 labelStyle:
                     TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 tabs: [
-                  Tab(text: "Book Ground"),
-                  Tab(text: "Ground Requests"),
+                  Tab(text: "Explore Grounds"),
+                  Tab(text: "Manage Requests"),
                 ],
               ),
             ),

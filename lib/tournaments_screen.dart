@@ -254,136 +254,133 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   }
 
   Widget _buildUserTournamentsList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: userTournaments.length,
-      itemBuilder: (context, index) {
-        final tournament = userTournaments[index];
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 400, // ⬅️ set your desired height here
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero, // remove side gaps
+        itemCount: userTournaments.length,
+        itemBuilder: (context, index) {
+          final tournament = userTournaments[index];
 
-        final String tournamentName =
-            tournament['tournamentName'] ?? 'Unnamed Tournament';
-        final String location = tournament['location'] ?? 'Unknown Location';
-        final DateTime startDate =
-            DateTime.tryParse(tournament['startDate'] ?? '') ?? DateTime.now();
-        final int totalTeams = tournament['numberOfTeams'] ?? 0;
-        final int registeredTeams = (tournament['teams'] as List?)?.length ?? 0;
-        final String tournamentType = tournament['tournamentType'] ?? '';
-        final int overs = tournament['oversPerMatch'] ?? 0;
-        final String? fixtureUrl = tournament['fixturePDFUrl'];
+          final String tournamentName =
+              tournament['tournamentName'] ?? 'Unnamed Tournament';
+          final String location = tournament['location'] ?? 'Unknown Location';
+          final DateTime startDate =
+              DateTime.tryParse(tournament['startDate'] ?? '') ??
+                  DateTime.now();
+          final int totalTeams = tournament['numberOfTeams'] ?? 0;
+          final int registeredTeams =
+              (tournament['teams'] as List?)?.length ?? 0;
+          final String tournamentType = tournament['tournamentType'] ?? '';
+          final int overs = tournament['oversPerMatch'] ?? 0;
+          final String? fixtureUrl = tournament['fixturePDFUrl'];
 
-        return Card(
-          color: Colors.black,
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Top Row: Tournament Name & Date
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        tournamentName,
+          return Container(
+            color: Colors.black,
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          tournamentName,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today,
+                              size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${startDate.day}/${startDate.month}/${startDate.year}',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 13,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on,
+                          size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        location,
                         style: GoogleFonts.montserrat(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildInfoChip(tournamentType),
+                      const SizedBox(width: 8),
+                      _buildInfoChip('$overs Overs'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Teams: $registeredTeams / $totalTeams',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.calendar_today,
-                            size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${startDate.day}/${startDate.month}/${startDate.year}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 13,
-                            color: Colors.grey[400],
+                      if (fixtureUrl != null && fixtureUrl.isNotEmpty)
+                        GestureDetector(
+                          onTap: () async {
+                            final uri = Uri.parse(fixtureUrl);
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Could not open fixture')),
+                              );
+                            }
+                          },
+                          child: Text(
+                            'View Fixture',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              color: Colors.lightBlueAccent,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                /// Location
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(
-                      location,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                /// Chips: Tournament Type and Overs
-                Row(
-                  children: [
-                    _buildInfoChip(tournamentType),
-                    const SizedBox(width: 8),
-                    _buildInfoChip('$overs Overs'),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                /// Bottom Row: Team Count & Fixture Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Teams: $registeredTeams / $totalTeams',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    if (fixtureUrl != null && fixtureUrl.isNotEmpty)
-                      GestureDetector(
-                        onTap: () async {
-                          final uri = Uri.parse(fixtureUrl);
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Could not open fixture')),
-                            );
-                          }
-                        },
-                        child: Text(
-                          'View Fixture',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            color: Colors.lightBlueAccent,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

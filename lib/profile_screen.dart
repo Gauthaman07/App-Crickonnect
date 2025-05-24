@@ -112,7 +112,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
               child: Column(
                 children: [
-                  _buildProfileSection("Personal Information"),
                   _buildProfileSection("My Bookings"),
                   _buildProfileSection("My Requests"),
                   _buildProfileSection("My Favourites"),

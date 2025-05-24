@@ -246,9 +246,9 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                             ? widget.ground["groundName"][0].toUpperCase() +
                                 widget.ground["groundName"].substring(1)
                             : "",
-                        style: GoogleFonts.montserrat(
+                        style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.w600, // ExtraBold (800)
+                          fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
                       ),

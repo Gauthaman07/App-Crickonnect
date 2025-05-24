@@ -6,10 +6,11 @@ import 'booking_screen.dart';
 import 'tournaments_screen.dart';
 import 'profile_screen.dart';
 import 'signup_screen.dart';
-import 'signin.dart'; // Import Sign-In screen
+import 'signin.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'push/notification_service.dart';
 import './services/fcm_manager.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,9 @@ Future<void> main() async {
   // Request notification permissions
   await NotificationService.requestNotificationPermissions();
 
+  // Get FCM token
   await FcmTokenManager.initializeAndSendToken();
+
   // Get shared preferences for login status
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -41,7 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? HomePage() : SignInScreen(), // Show Sign-In first
+      home: isLoggedIn ? HomePage() : SignInScreen(),
       routes: {
         '/home': (context) => HomePage(),
         '/signup': (context) => SignUpScreen(),
@@ -60,6 +63,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Set up FCM listener for foreground notifications
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        final snackBar = SnackBar(
+          content: Text(
+            '${message.notification!.title ?? 'Notification'}: ${message.notification!.body ?? ''}',
+          ),
+          duration: Duration(seconds: 3),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    });
+
+    // Initialize screens with navigation handler
+    _screens = [
+      HomeScreen(onNavigateToTab: _onItemTapped),
+      BookingScreen(),
+      TournamentsScreen(),
+      ProfileScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -67,24 +97,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  final List<Widget> _screens = [
-    HomeScreen(onNavigateToTab: (index) {}), // Placeholder for now
-    BookingScreen(),
-    TournamentsScreen(),
-    ProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          HomeScreen(onNavigateToTab: _onItemTapped), // Updated here ✅
-          BookingScreen(),
-          TournamentsScreen(),
-          ProfileScreen(),
-        ],
+        children: _screens,
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
