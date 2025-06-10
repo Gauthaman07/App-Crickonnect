@@ -4,7 +4,6 @@ import 'create_tournament.dart';
 import '/services/api_service.dart';
 import 'register_tournament.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TournamentsScreen extends StatefulWidget {

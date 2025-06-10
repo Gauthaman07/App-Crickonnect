@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 import 'booking_confirmation_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class GroundDetailsPage extends StatefulWidget {
   final Map<String, dynamic> ground;
