@@ -529,10 +529,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage>
       duration: const Duration(milliseconds: 500),
       curve: Curves.elasticOut,
       builder: (context, value, child) {
+        final safeOpacity = value.clamp(0.0, 1.0);
         return Opacity(
-          opacity: value,
+          opacity: safeOpacity,
           child: Transform.translate(
-            offset: Offset(0, (1 - value) * 20),
+            offset: Offset(0, (1 - safeOpacity) * 20),
             child: Column(
               children: [
                 Text(

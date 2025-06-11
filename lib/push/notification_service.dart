@@ -1,112 +1,120 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+// lib/services/notification_service.dart
 
-// Background message handler - must be top-level function
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/material.dart';
+import '../main.dart'; // for navigatorKey
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you need the Firebase instance in the background handler,
-  // you would initialize it here
-  // await Firebase.initializeApp();
-
-  print("Handling a background message: ${message.messageId}");
-  // Handle background message
+  // This runs when the app is in background or terminated
+  print('🕑 Background message: ${message.messageId}');
 }
 
 class NotificationService {
-  static final FirebaseMessaging _firebaseMessaging =
-      FirebaseMessaging.instance;
+  static final FirebaseMessaging _fm = FirebaseMessaging.instance;
+  static final FlutterLocalNotificationsPlugin _ln =
+      FlutterLocalNotificationsPlugin();
 
-  // Initialize Firebase Messaging
+  /// Call this once in main() after Firebase.initializeApp()
   static Future<void> initializeFirebaseMessaging() async {
-    // Set up background message handler
+    // 1️⃣ Background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Handle messages when the app is in the foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
+    // 2️⃣ Set up local notifications
+    await _initLocalNotifications();
 
-      if (message.notification != null) {
-        print('Message also contained a notification:');
-        print('Title: ${message.notification!.title}');
-        print('Body: ${message.notification!.body}');
+    // 3️⃣ Foreground messages → show a local notification
+    FirebaseMessaging.onMessage.listen((RemoteMessage msg) {
+      final notification = msg.notification;
+      final type = msg.data['type'];
+      if (notification != null) {
+        _ln.show(
+          msg.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'booking_channel', // channel id
+              'Booking Notifications', // channel name
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+          ),
+          payload: type, // carry the notification type
+        );
       }
-
-      // Here you would typically show a local notification
-      // using flutter_local_notifications package
     });
 
-    // Handle when a user taps on a notification and the app was terminated
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-      if (message != null) {
-        print('App opened from terminated state by notification');
-        // Navigate to relevant page based on the notification data
-      }
-    });
+    // 4️⃣ App opened from terminated state by tapping a notification
+    final initialMsg = await _fm.getInitialMessage();
+    if (initialMsg != null) {
+      _handleNavigation(initialMsg.data['type'], initialMsg.data);
+    }
 
-    // Handle when a user taps on a notification and the app was in the background
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('App opened from background state by notification');
-      // Navigate to relevant page based on the notification data
+    // 5️⃣ App resumed (in background) by tapping a notification
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) {
+      _handleNavigation(msg.data['type'], msg.data);
     });
+  }
 
-    // For web platform
-    if (kIsWeb) {
-      // Request permission for web
-      NotificationSettings settings =
-          await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      print(
-          'Web notification authorization status: ${settings.authorizationStatus}');
+  /// Internal: configure flutter_local_notifications
+  static Future<void> _initLocalNotifications() async {
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
+
+    await _ln.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse resp) {
+        // User tapped the local notification
+        _handleNavigation(resp.payload, {});
+      },
+    );
+  }
+
+  /// Routes based on `type` field in the FCM data payload
+  static void _handleNavigation(String? type, Map<String, dynamic> data) {
+    if (type == null) return;
+
+    switch (type) {
+      case 'new_booking_request':
+        navigatorKey.currentState?.pushNamed(
+          '/bookingrequests',
+          arguments: data,
+        );
+        break;
+
+      // add more cases here for other notification types
+      default:
+        print('⚠️ Unhandled notification type: $type');
     }
   }
 
+  /// Request permission for iOS / web
+  static Future<void> requestNotificationPermissions() async {
+    final settings = await _fm.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    print('🔔 Notification permission: ${settings.authorizationStatus}');
+  }
+
+  /// Retrieve the current FCM token
   static Future<String?> getFcmToken() async {
     try {
-      String? token = await _firebaseMessaging.getToken();
-      print('FCM Token: $token');
+      final token = await _fm.getToken();
+      print('✉️ FCM Token: $token');
       return token;
     } catch (e) {
-      print('Error getting FCM token: $e');
+      print('❌ Error fetching FCM token: $e');
       return null;
     }
   }
 
+  /// Listen for token refresh events
   static void setupTokenRefreshListener(Function(String) onTokenRefresh) {
-    _firebaseMessaging.onTokenRefresh.listen((String token) {
-      print('FCM token refreshed: $token');
-      // Call the callback function with the new token
-      onTokenRefresh(token);
-    });
-  }
-
-  // Add the permission request function here too
-  static Future<void> requestNotificationPermissions() async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    print(
-        'User notification permission status: ${settings.authorizationStatus}');
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
-    } else {
-      print('User declined or has not accepted permission');
-    }
+    _fm.onTokenRefresh.listen(onTokenRefresh);
   }
 }
