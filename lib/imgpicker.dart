@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUploadTest extends StatefulWidget {
+  const ImageUploadTest({super.key});
+
   @override
   _ImageUploadTestState createState() => _ImageUploadTestState();
 }

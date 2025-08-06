@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './services/api_service.dart'; // Import the new API service
 import 'signup_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import './myteam/create_team_form.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -66,7 +66,8 @@ class _SignInScreenState extends State<SignInScreen> {
           SnackBar(content: Text('Login Successful!')),
         );
 
-        Navigator.pushReplacementNamed(context, '/home');
+        // Check if user has a team before navigating
+        await _checkTeamAndNavigate();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${response["message"]}')),
@@ -80,6 +81,55 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _checkTeamAndNavigate() async {
+    try {
+      final teamResponse = await ApiService.getMyTeam();
+
+      if (teamResponse != null && teamResponse.containsKey('error')) {
+        // No team found, navigate to team creation form with callback
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateTeamForm(
+              onTeamCreated: () {
+                // Navigate to home after team creation
+                Navigator.pushReplacementNamed(context, '/home');
+              },
+            ),
+          ),
+        );
+      } else if (teamResponse != null) {
+        // Team exists, navigate to home
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        // Fallback - navigate to team creation form
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateTeamForm(
+              onTeamCreated: () {
+                Navigator.pushReplacementNamed(context, '/home');
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error checking team: $e');
+      // On error, navigate to team creation form
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreateTeamForm(
+            onTeamCreated: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+          ),
+        ),
+      );
     }
   }
 

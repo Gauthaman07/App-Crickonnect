@@ -143,8 +143,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LoadingAnimationWidget.threeArchedCircle(
-                      color: Colors.red, // Main color for the arcs
-                      size: 40, // Size of the loader
+                      color: Colors.red,
+                      size: 40,
                     ),
                     SizedBox(height: 16),
                     Text('Processing request...',
@@ -199,8 +199,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     if (isLoading) {
       return Center(
         child: LoadingAnimationWidget.threeArchedCircle(
-          color: Colors.red, // Main color for the arcs
-          size: 40, // Size of the loader
+          color: Colors.red,
+          size: 40,
         ),
       );
     }
@@ -227,17 +227,17 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header
+        // Section Header - Updated to be smaller and left-aligned
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          child: Center(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Align(
+            alignment: Alignment.centerLeft,
             child: Text(
               "Pending Requests",
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
+                fontSize: 14, // Reduced from 18
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
               ),
             ),
           ),
@@ -252,17 +252,17 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header
+        // Section Header - Updated to be smaller and left-aligned
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          child: Center(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Align(
+            alignment: Alignment.centerLeft,
             child: Text(
               "Your Bookings",
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'Boldonse',
-                color: Colors.red,
+                fontSize: 14, // Already small, kept same
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
               ),
             ),
           ),
@@ -290,11 +290,11 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(
-          vertical: 18, horizontal: 20), // Increased vertical margin
+      height: 160, // Fixed height for consistent card size
+      margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12), // Changed to 12
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
@@ -305,102 +305,108 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12), // Changed to 12
         child: Column(
           children: [
-            // Top section - Team info
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18), // Increased padding
-              color: Colors.white,
+            // Main content area
+            Expanded(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Team logo
-                  Container(
-                    width: 75, // Increased from 70
-                    height: 90, // Increased from 85
-                    decoration: BoxDecoration(
-                      color: teamLogo.isNotEmpty ? null : Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: teamLogo.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              teamLogo,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Center(
-                                child: Icon(Icons.sports_soccer,
-                                    color: Colors.red,
-                                    size: 34), // Increased icon size
-                              ),
-                            ),
-                          )
-                        : const Center(
-                            child: Icon(Icons.sports_soccer,
-                                color: Colors.red,
-                                size: 34), // Increased icon size
-                          ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Team details
+                  // Left side - Team Logo (30% width, full height)
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _capitalize(teamName),
-                          style: const TextStyle(
-                            fontSize: 20, // Increased from 19
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                    flex: 30,
+                    child: Container(
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: teamLogo.isNotEmpty ? null : Colors.red.shade100,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          bottomLeft: Radius.circular(12),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "$date | $time",
-                          style: const TextStyle(
-                            fontSize: 16, // Increased from 15
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Status: ${_capitalize(status)}",
-                          style: TextStyle(
-                            fontSize: 15, // Increased from 14
-                            fontWeight: FontWeight.w600,
-                            color: status.toLowerCase() == "booked"
-                                ? Colors.green
-                                : Colors.orange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Booking label
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(color: Colors.grey.shade200, width: 1),
+                        child: teamLogo.isNotEmpty
+                            ? Image.network(
+                                teamLogo,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  color: Colors.red.shade100,
+                                  child: Center(
+                                    child: Icon(Icons.sports_soccer,
+                                        color: Colors.red, size: 40),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                color: Colors.red.shade100,
+                                child: Center(
+                                  child: Icon(Icons.sports_soccer,
+                                      color: Colors.red, size: 40),
+                                ),
+                              ),
                       ),
                     ),
-                    child: RotatedBox(
-                      quarterTurns: 3,
-                      child: Text(
-                        "Request",
-                        style: TextStyle(
-                          fontSize: 13, // Increased from 12
-                          color: Colors.grey.shade500,
-                          letterSpacing: 1,
-                        ),
+                  ),
+
+                  // Right side - Content (70% width)
+                  Expanded(
+                    flex: 70,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Top section - Team name and details
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _capitalize(teamName),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "${date.toUpperCase()} | ${time.toUpperCase()}",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "₹ $fee",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Bottom section - Status
+                          Text(
+                            _capitalize(status),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: status.toLowerCase() == "booked"
+                                  ? Colors.green
+                                  : Colors.orange,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -408,52 +414,19 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               ),
             ),
 
-            // Dotted separator
-            Container(
-              height: 1,
-              color: Colors.grey.shade300,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Flex(
-                    direction: Axis.horizontal,
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      (constraints.constrainWidth() / 10).floor(),
-                      (index) => Container(
-                        height: 1,
-                        width: 5,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
             // Action buttons - Only for pending bookings
-            if (status.toLowerCase() !=
-                "booked") // Hide buttons if status is "booked"
+            if (status.toLowerCase() != "booked")
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    vertical: 18, horizontal: 20), // Increased vertical padding
+                height: 60,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      offset: const Offset(0, -2),
-                      blurRadius: 8,
-                    ),
-                  ],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
+                  color: Colors.grey.shade50,
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200, width: 1),
                   ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: ElevatedButton(
@@ -461,7 +434,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                             ? null
                             : () => handleBookingAction(bookingId, false),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
+                          backgroundColor: Colors.red.shade50,
                           foregroundColor: Colors.red.shade700,
                           disabledBackgroundColor: Colors.grey.shade100,
                           elevation: 0,
@@ -470,17 +443,16 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                             side: BorderSide(
                               color: isActionInProgress || bookingId.isEmpty
                                   ? Colors.grey.shade300
-                                  : Colors.red.shade500,
-                              width: 1.5,
+                                  : Colors.red.shade300,
+                              width: 1,
                             ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14), // Increased from 12
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: Text(
                           "Decline",
                           style: TextStyle(
-                            fontSize: 15, // Increased from 14
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: isActionInProgress || bookingId.isEmpty
                                 ? Colors.grey.shade500
@@ -496,30 +468,23 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                             ? null
                             : () => handleBookingAction(bookingId, true),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.green.shade700,
+                          backgroundColor: Colors.green.shade600,
+                          foregroundColor: Colors.white,
                           disabledBackgroundColor: Colors.grey.shade100,
-                          elevation: 0,
+                          elevation: 1,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                              color: isActionInProgress || bookingId.isEmpty
-                                  ? Colors.grey.shade300
-                                  : Colors.green.shade500,
-                              width: 1.5,
-                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14), // Increased from 12
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: Text(
                           "Accept",
                           style: TextStyle(
-                            fontSize: 15, // Increased from 14
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: isActionInProgress || bookingId.isEmpty
                                 ? Colors.grey.shade500
-                                : Colors.green.shade700,
+                                : Colors.white,
                           ),
                         ),
                       ),
@@ -543,13 +508,14 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     final String status = booking['status'] ?? "Unknown";
     final String groundImage = booking['groundImg'] ?? "";
     final String fee = booking['groundFee']?.toString() ?? "";
+
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(
-          vertical: 18, horizontal: 20), // Increased vertical margin
+      height: 140, // Fixed height for consistent card size
+      margin: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12), // Changed to 12
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
@@ -560,164 +526,123 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12), // Changed to 12
         child: Column(
           children: [
-            // Top section - Team info
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18), // Increased padding
-              color: Colors.white,
+            // Main content area
+            Expanded(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Team logo - increased dimensions
-                  Container(
-                    width: 75, // Increased from 70
-                    height: 90, // Increased from 85
-                    decoration: BoxDecoration(
-                      color:
-                          groundImage.isNotEmpty ? null : Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(8),
+                  // Left side - Ground Image (30% width, full height)
+                  Expanded(
+                    flex: 30,
+                    child: Container(
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color:
+                            groundImage.isNotEmpty ? null : Colors.red.shade100,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          bottomLeft: Radius.circular(12),
+                        ),
+                        child: groundImage.isNotEmpty
+                            ? Image.network(
+                                groundImage,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  color: Colors.red.shade100,
+                                  child: Center(
+                                    child: Icon(Icons.sports_soccer,
+                                        color: Colors.red, size: 40),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                color: Colors.red.shade100,
+                                child: Center(
+                                  child: Icon(Icons.sports_soccer,
+                                      color: Colors.red, size: 40),
+                                ),
+                              ),
+                      ),
                     ),
-                    child: groundImage.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              groundImage,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Center(
-                                child: Icon(Icons.sports_soccer,
-                                    color: Colors.red,
-                                    size: 34), // Increased icon size
+                  ),
+
+                  // Right side - Content (70% width)
+                  Expanded(
+                    flex: 70,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Top section - Ground name and details
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _capitalize(groundName),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                teamName.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                "${date.toUpperCase()} | ${time.toUpperCase()}",
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                "₹ $fee",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Bottom section - Status (centered)
+                          Center(
+                            child: Text(
+                              _capitalize(status),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: status.toLowerCase() == 'pending'
+                                    ? Colors.orange
+                                    : status.toLowerCase() == 'booked'
+                                        ? Colors.green
+                                        : Colors.red,
                               ),
                             ),
-                          )
-                        : const Center(
-                            child: Icon(Icons.sports_soccer,
-                                color: Colors.red,
-                                size: 34), // Increased icon size
                           ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Team details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _capitalize(groundName),
-                          style: const TextStyle(
-                            fontSize: 20, // Increased from 19
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          _capitalize(teamName),
-                          style: TextStyle(
-                            fontSize: 15, // Increased from 14
-                            color: Colors.grey.shade600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "${_capitalizeFirstLetter(date)} | $time",
-                          style: const TextStyle(
-                            fontSize: 15, // Increased from 14
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          " ${_capitalize(status)}",
-                          style: TextStyle(
-                            fontSize: 15, // Increased from 14
-                            fontWeight: FontWeight.w600,
-                            color: status.toLowerCase() == 'pending'
-                                ? Colors.orange
-                                : Colors.green, // Conditional color
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  // Booking label
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(color: Colors.grey.shade200, width: 1),
+                        ],
                       ),
-                    ),
-                    child: RotatedBox(
-                      quarterTurns: 3,
-                      child: Text(
-                        "Booking",
-                        style: TextStyle(
-                          fontSize: 13, // Increased from 12
-                          color: Colors.grey.shade500,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Dotted separator
-            Container(
-              height: 1,
-              color: Colors.grey.shade300,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Flex(
-                    direction: Axis.horizontal,
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      (constraints.constrainWidth() / 10).floor(),
-                      (index) => Container(
-                        height: 1,
-                        width: 5,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Amount section
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14), // Increased vertical padding
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Fee",
-                    style: TextStyle(
-                      fontSize: 17, // Increased from 16
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    "₹ $fee",
-                    style: const TextStyle(
-                      fontSize: 17, // Increased from 16
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
                     ),
                   ),
                 ],

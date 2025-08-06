@@ -2,11 +2,10 @@
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/material.dart';
 import '../main.dart'; // for navigatorKey
 
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // This runs when the app is in background or terminated
   print('🕑 Background message: ${message.messageId}');
 }
@@ -19,7 +18,7 @@ class NotificationService {
   /// Call this once in main() after Firebase.initializeApp()
   static Future<void> initializeFirebaseMessaging() async {
     // 1️⃣ Background handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     // 2️⃣ Set up local notifications
     await _initLocalNotifications();

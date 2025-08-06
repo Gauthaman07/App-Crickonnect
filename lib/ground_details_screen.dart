@@ -55,17 +55,13 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
       setState(() {
         isLoadingTeams = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to load teams: $e")),
-      );
+      showErrorDialog(context, "Failed to load teams: $e");
     }
   }
 
   Future<void> bookGround() async {
     if (userTeams.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No teams available for booking.")),
-      );
+      showErrorDialog(context, "No teams available for booking.");
       return;
     }
 
@@ -79,10 +75,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
 
     // Validate ground ID
     if (groundId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Ground information is incomplete. Missing ID.")),
-      );
+      showErrorDialog(context, "Ground information is incomplete. Missing ID.");
       return;
     }
 
@@ -123,24 +116,17 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
       } else {
         // Show error message
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  response["message"] ?? "Booking failed. Please try again."),
-              backgroundColor: Colors.red,
-            ),
+          showErrorDialog(
+            context,
+            response["message"]?.toString() ??
+                "Booking failed. Please try again.",
           );
         }
       }
     } catch (e) {
       // Handle any exceptions during booking
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error during booking: $e"),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorDialog(context, "Error during booking: $e");
       }
     } finally {
       // Always hide the loader, regardless of outcome
@@ -150,6 +136,30 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
         });
       }
     }
+  }
+
+  void showErrorDialog(BuildContext context, String? message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            "Oops!",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(message ?? "Something went wrong."),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text("Close"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -242,8 +252,8 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                     children: [
                       Text(
                         widget.ground["groundName"].isNotEmpty
-                            ? widget.ground["groundName"][0].toUpperCase() +
-                                widget.ground["groundName"].substring(1)
+                            ? widget.ground["groundName"]
+                                .toUpperCase() // Changed to all caps
                             : "",
                         style: TextStyle(
                           fontSize: 24,
@@ -257,35 +267,74 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                           style: const TextStyle(
                               fontSize: 16, color: Colors.black)),
                       const SizedBox(height: 20),
+
+                      // Team name in a box with shadow and logo on left
                       Container(
-                        width: double.infinity, // Makes it take full width
-                        alignment: Alignment.center, // Centers the text
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                                color: Colors.grey.shade300,
-                                width: 1), // Gainsboro
-                            bottom: BorderSide(
-                                color: Colors.grey.shade300,
-                                width: 1), // Gainsboro
-                          ),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14), // Adjust padding for spacing
-                        child: Text(
-                          widget.ground['ownedByTeam'] != null
-                              ? widget.ground['ownedByTeam']['teamName']
-                                      .toString()
-                                      .isNotEmpty
-                                  ? widget.ground['ownedByTeam']['teamName'][0]
-                                          .toUpperCase() +
-                                      widget.ground['ownedByTeam']['teamName']
-                                          .substring(1)
-                                  : 'No Team'
-                              : 'No Team',
-                          style: TextStyle(fontSize: 16, color: Colors.black54),
-                          textAlign: TextAlign
-                              .center, // Ensures text alignment inside the container
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            // Team Logo on the left
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(25),
+                              child: Image.network(
+                                widget.ground['ownedByTeam']?['teamLogo'] ?? "",
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 50,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    child: Icon(
+                                      Icons.sports_cricket,
+                                      size: 25,
+                                      color: Colors.grey[600],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Team Name on the right
+                            Expanded(
+                              child: Text(
+                                widget.ground['ownedByTeam'] != null
+                                    ? widget.ground['ownedByTeam']['teamName']
+                                            .toString()
+                                            .isNotEmpty
+                                        ? widget.ground['ownedByTeam']
+                                                    ['teamName'][0]
+                                                .toUpperCase() +
+                                            widget.ground['ownedByTeam']
+                                                    ['teamName']
+                                                .substring(1)
+                                        : 'No Team'
+                                    : 'No Team',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -405,14 +454,90 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              buildSessionButton("Morning"),
-              const SizedBox(width: 10),
-              buildSessionButton("Afternoon"),
-              const SizedBox(width: 10),
-              buildSessionButton("Evening"), // Added Evening
-            ],
+          Container(
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.grey[200], // Light background
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: Stack(
+              children: [
+                // Animated background indicator
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  left: selectedSession == "morning"
+                      ? 2
+                      : null, // Changed to lowercase
+                  right: selectedSession == "afternoon"
+                      ? 2
+                      : null, // Changed to lowercase
+                  top: 2,
+                  bottom: 2,
+                  width: (MediaQuery.of(context).size.width - 36) / 2,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(23),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Session options
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => selectedSession =
+                            "morning"), // Changed to lowercase
+                        child: Container(
+                          height: 45,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Morning", // Display text remains capitalized
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: selectedSession ==
+                                      "morning" // Changed to lowercase
+                                  ? Colors.black87
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => selectedSession =
+                            "afternoon"), // Changed to lowercase
+                        child: Container(
+                          height: 45,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Afternoon", // Display text remains capitalized
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: selectedSession ==
+                                      "afternoon" // Changed to lowercase
+                                  ? Colors.black87
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

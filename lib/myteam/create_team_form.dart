@@ -16,6 +16,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   File? _teamLogo;
+  File? _groundImage; // Added ground image
 
   final TextEditingController teamNameController = TextEditingController();
   String? teamLocation;
@@ -53,6 +54,15 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
     }
   }
 
+  Future<void> _pickGroundImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _groundImage = File(image.path);
+      });
+    }
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -62,25 +72,70 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
       return;
     }
 
+    // Additional validation for ground details
+    if (hasOwnGround) {
+      if (groundNameController.text.trim().isEmpty ||
+          groundDescController.text.trim().isEmpty ||
+          groundLocationController.text.trim().isEmpty ||
+          groundFeesController.text.trim().isEmpty ||
+          _groundImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Please fill all ground details and upload ground image')),
+        );
+        return;
+      }
+
+      if (selectedFacilities.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select at least one facility')),
+        );
+        return;
+      }
+    }
+
     setState(() => _isSubmitting = true);
 
+    // Updated to match backend field names
     Map<String, dynamic> teamData = {
       "teamName": teamNameController.text.trim(),
-      "teamLocation": teamLocation,
+      "location": teamLocation, // Changed from teamLocation
       "hasOwnGround": hasOwnGround,
-      // You'll need to handle image upload in your API service
       "teamLogo": _teamLogo,
     };
 
+    // Add ground fields directly (not nested) when hasOwnGround is true
     if (hasOwnGround) {
-      teamData["groundDetails"] = {
+      teamData.addAll({
         "groundName": groundNameController.text.trim(),
-        "groundDescription": groundDescController.text.trim(),
-        "groundLocation": groundLocationController.text.trim(),
-        "groundFacilities": selectedFacilities,
-        "groundFees": groundFeesController.text.trim()
-      };
+        "description":
+            groundDescController.text.trim(), // Changed from groundDescription
+        "groundMaplink":
+            groundLocationController.text.trim(), // Changed from groundLocation
+        "facilities": selectedFacilities, // Changed from groundFacilities
+        "groundFee":
+            groundFeesController.text.trim(), // Changed from groundFees
+        "groundImage": _groundImage, // Added ground image
+      });
     }
+
+    // ADD THIS DEBUG LOGGING HERE (before the API call)
+    print('=== FORM SUBMISSION DEBUG ===');
+    print('hasOwnGround: $hasOwnGround');
+    print('teamName: ${teamNameController.text.trim()}');
+    print('location: $teamLocation');
+    print('teamLogo file path: ${_teamLogo?.path}');
+
+    if (hasOwnGround) {
+      print('groundName: ${groundNameController.text.trim()}');
+      print('description: ${groundDescController.text.trim()}');
+      print('groundMaplink: ${groundLocationController.text.trim()}');
+      print('facilities: $selectedFacilities');
+      print('groundFee: ${groundFeesController.text.trim()}');
+      print('groundImage file path: ${_groundImage?.path}');
+    }
+    print('=== END DEBUG ===');
 
     try {
       Map<String, dynamic> response = await ApiService.createTeam(teamData);
@@ -113,15 +168,19 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
           'Create Team',
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 16,
-            color: Colors.black,
+            fontSize: 18,
+            color: Colors.white, // White text
+            fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.red, // Red background
         foregroundColor: Colors.white,
         elevation: 0,
+        toolbarHeight: 70, // Increased height
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white), // White icons
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // White background for the form
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -325,7 +384,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     controller: groundFeesController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Ground Fees (₹ per hour)',
+                      labelText: 'Ground Fees (₹ per match)',
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -335,6 +394,49 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Enter ground fees' : null,
+                  ),
+                  SizedBox(height: 16),
+
+                  // Ground Image Upload
+                  Text(
+                    "GROUND IMAGE",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: _pickGroundImage,
+                    child: Container(
+                      height: 150,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                        image: _groundImage != null
+                            ? DecorationImage(
+                                image: FileImage(_groundImage!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: _groundImage == null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo,
+                                    size: 40, color: Colors.grey[600]),
+                                SizedBox(height: 8),
+                                Text('Upload Ground Image',
+                                    style: TextStyle(color: Colors.grey[600])),
+                              ],
+                            )
+                          : null,
+                    ),
                   ),
                   SizedBox(height: 24),
 
@@ -365,22 +467,16 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                           label: Text(
                             facility,
                             style: TextStyle(
-                              color: isSelected
-                                  ? Colors.red
-                                  : Colors.black, // Red text if selected
+                              color: isSelected ? Colors.red : Colors.black,
                             ),
                           ),
                           selected: isSelected,
-                          backgroundColor:
-                              Colors.transparent, // No bg when not selected
-                          selectedColor:
-                              Colors.transparent, // No bg when selected
+                          backgroundColor: Colors.transparent,
+                          selectedColor: Colors.transparent,
                           checkmarkColor: Colors.red,
                           side: BorderSide(
-                            color: isSelected
-                                ? Colors.red
-                                : Colors
-                                    .grey.shade300, // Red border when selected
+                            color:
+                                isSelected ? Colors.red : Colors.grey.shade300,
                             width: 1.5,
                           ),
                           onSelected: (bool selected) {

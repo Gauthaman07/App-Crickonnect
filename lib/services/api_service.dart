@@ -85,7 +85,7 @@ class ApiService {
     }
   }
 
-  // Create a team
+// Create a team
   static Future<Map<String, dynamic>> createTeam(
       Map<String, dynamic> teamData) async {
     try {
@@ -100,47 +100,90 @@ class ApiService {
       final request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
 
-      // Add text fields
-      request.fields['teamName'] = teamData['teamName'];
-      request.fields['location'] = teamData['teamLocation'];
+      // Add text fields with proper null handling and correct field names
+      request.fields['teamName'] = teamData['teamName']?.toString() ?? '';
+      request.fields['location'] =
+          teamData['location']?.toString() ?? ''; // Changed from 'teamLocation'
       request.fields['hasOwnGround'] = teamData['hasOwnGround'].toString();
 
-      if (teamData.containsKey('groundDetails')) {
-        final ground = teamData['groundDetails'];
-        request.fields['groundName'] = ground['groundName'];
-        request.fields['groundDescription'] = ground['groundDescription'];
-        request.fields['groundLocation'] = ground['groundLocation'];
-        request.fields['groundFees'] = ground['groundFees'];
-        List facilities = ground['groundFacilities'];
-        for (int i = 0; i < facilities.length; i++) {
-          request.fields['facilities[$i]'] = facilities[i];
+      // Handle ground details - your form now sends flat fields, not nested
+      if (teamData['hasOwnGround'] == true) {
+        request.fields['groundName'] = teamData['groundName']?.toString() ?? '';
+        request.fields['description'] = teamData['description']?.toString() ??
+            ''; // Changed from 'groundDescription'
+        request.fields['groundMaplink'] =
+            teamData['groundMaplink']?.toString() ??
+                ''; // Changed from 'groundLocation'
+        request.fields['groundFee'] = teamData['groundFee']?.toString() ??
+            ''; // Changed from 'groundFees'
+
+        // Handle facilities array with proper null checking
+        if (teamData['facilities'] != null && teamData['facilities'] is List) {
+          List<String> facilitiesList =
+              (teamData['facilities'] as List).cast<String>();
+          for (int i = 0; i < facilitiesList.length; i++) {
+            request.fields['facilities[$i]'] = facilitiesList[i];
+          }
         }
       }
 
-      // Add the image
-      final File logoFile = teamData['teamLogo'];
-      final mimeType = lookupMimeType(logoFile.path); // e.g. image/png
-      if (mimeType == null || !mimeType.startsWith('image/')) {
-        return {
-          "success": false,
-          "message": "Invalid image format. Please use JPG, JPEG, or PNG."
-        };
+      // Add team logo with proper null checking
+      if (teamData['teamLogo'] != null && teamData['teamLogo'] is File) {
+        final File logoFile = teamData['teamLogo'];
+        final mimeType = lookupMimeType(logoFile.path);
+
+        if (mimeType == null || !mimeType.startsWith('image/')) {
+          return {
+            "success": false,
+            "message": "Invalid team logo format. Please use JPG, JPEG, or PNG."
+          };
+        }
+
+        final mediaType = MediaType.parse(mimeType);
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'teamLogo',
+            logoFile.path,
+            contentType: mediaType,
+            filename: basename(logoFile.path),
+          ),
+        );
       }
 
-      final mediaType =
-          MediaType.parse(mimeType); // Safe way to pass contentType
+      // Add ground image if present
+      if (teamData['groundImage'] != null && teamData['groundImage'] is File) {
+        final File groundFile = teamData['groundImage'];
+        final mimeType = lookupMimeType(groundFile.path);
 
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'teamLogo',
-          logoFile.path,
-          contentType: mediaType,
-          filename: basename(logoFile.path),
-        ),
-      );
+        if (mimeType == null || !mimeType.startsWith('image/')) {
+          return {
+            "success": false,
+            "message":
+                "Invalid ground image format. Please use JPG, JPEG, or PNG."
+          };
+        }
+
+        final mediaType = MediaType.parse(mimeType);
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'groundImage',
+            groundFile.path,
+            contentType: mediaType,
+            filename: basename(groundFile.path),
+          ),
+        );
+      }
+
+      // Debug logging
+      print('Request fields being sent: ${request.fields}');
+      print(
+          'Request files being sent: ${request.files.map((f) => f.field).toList()}');
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {"success": true, "message": "Team created successfully"};
@@ -152,6 +195,7 @@ class ApiService {
         };
       }
     } catch (e) {
+      print('Detailed API error: $e');
       return {
         "success": false,
         "message": "Network error: ${e.toString()}",
