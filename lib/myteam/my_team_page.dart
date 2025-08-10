@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'create_team_form.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter/cupertino.dart';
 
 class MyTeamPage extends StatefulWidget {
   const MyTeamPage({super.key});
@@ -78,12 +78,14 @@ class _MyTeamPageState extends State<MyTeamPage> {
         onRefresh: fetchMyTeam,
         child: isLoading
             ? Center(
-                child: LoadingAnimationWidget.threeArchedCircle(
-                  color: Colors.red, // Main color for the arcs
-                  size: 40, // Size of the loader
+                child: CupertinoActivityIndicator(
+                  radius: 12, // Small size (consistent with other screens)
+                  color: Colors.grey.shade600, // Metal silver color
                 ),
               )
             : errorMessage != null
+                // ... rest of your code
+
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

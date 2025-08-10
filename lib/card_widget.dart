@@ -23,7 +23,7 @@ class CardWidget extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white, // White background as requested
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,

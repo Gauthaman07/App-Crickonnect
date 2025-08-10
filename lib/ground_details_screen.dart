@@ -167,7 +167,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFF5F0ED),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,6 +621,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: Colors.white, // Added white background to outer container
         border: Border(
           top: BorderSide(
             color: Colors.grey[300]!,
@@ -629,6 +630,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
         ),
       ),
       child: Row(
+        // Removed the inner Container since outer container now has white background
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Fee display on left with some padding

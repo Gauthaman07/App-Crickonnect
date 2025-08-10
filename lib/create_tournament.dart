@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter/cupertino.dart';
 
 class CreateTournamentScreen extends StatefulWidget {
-  const CreateTournamentScreen({super.key});
+  final bool isEmbedded; // Add this parameter
+
+  const CreateTournamentScreen({super.key, this.isEmbedded = false});
 
   @override
   State<CreateTournamentScreen> createState() => _CreateTournamentScreenState();
@@ -240,7 +242,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Tournament created successfully!')),
           );
-          Navigator.pop(context);
+
+          // Only navigate away if not embedded in tabs
+          if (!widget.isEmbedded) {
+            Navigator.pop(context);
+          }
         }
       } catch (e) {
         // Error handling
@@ -262,6 +268,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // If embedded, don't show Scaffold
+    if (widget.isEmbedded) {
+      return _buildFormContent();
+    }
+
+    // Original Scaffold version for standalone use
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -271,21 +283,29 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: _isLoading
-          ? Center(
-              child: LoadingAnimationWidget.threeArchedCircle(
-                color: Colors.red,
-                size: 40,
-              ),
-            )
-          : Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+      body: _buildFormContent(),
+    );
+  }
+
+  Widget _buildFormContent() {
+    return _isLoading
+        ? Center(
+            child: CupertinoActivityIndicator(
+              radius: 12, // Small size (consistent with other screens)
+              color: Colors.grey.shade600, // Metal silver color
+            ),
+          )
+        : Form(
+            // ... rest of your form code
+
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Remove the title when embedded
+                  if (!widget.isEmbedded) ...[
                     const Text(
                       'Create Tournament',
                       style: TextStyle(
@@ -295,160 +315,143 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _tournamentNameController,
-                      label: 'Tournament Name',
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildDropdown(
-                      label: 'Tournament Type',
-                      value: _tournamentTypeController.text,
-                      items: _tournamentTypeOptions,
-                      onChanged: (value) {
-                        _tournamentTypeController.text = value!;
-                      },
-                    ),
-                    _buildTextField(
-                      controller: _locationController,
-                      label: 'Location',
-                      // hint: 'Enter tournament location',
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildTextField(
-                      controller: _groundNameController,
-                      label: 'Ground Name (Optional)',
-                      // hint: 'Enter ground name',
-                    ),
-                    // const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _organizerNameController,
-                      label: 'Organizer Name',
-                      // hint: 'Enter organizer name',
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildTextField(
-                      controller: _phoneController,
-                      label: 'Phone (Optional)',
-                      // hint: 'Enter contact phone',
-                      keyboardType: TextInputType.phone,
-                    ),
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email (Optional)',
-                      // hint: 'Enter contact email',
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    // const SizedBox(height: 16),
-                    _buildDatePicker(
-                      label: 'Start Date',
-                      value: _dateFormat.format(_startDate),
-                      onTap: () => _selectDate(context, 'start'),
-                    ),
-                    _buildDatePicker(
-                      label: 'End Date',
-                      value: _dateFormat.format(_endDate),
-                      onTap: () => _selectDate(context, 'end'),
-                    ),
-                    _buildDatePicker(
-                      label: 'Last Date to Register',
-                      value: _dateFormat.format(_lastDateToRegister),
-                      onTap: () => _selectDate(context, 'register'),
-                    ),
-                    _buildDropdown(
-                      label: 'Match Days Preference',
-                      value: _matchDaysPreference,
-                      items: _matchDaysOptions,
-                      onChanged: (value) {
-                        setState(() {
-                          _matchDaysPreference = value!;
-                        });
-                      },
-                    ),
-                    // const SizedBox(height: 16),
-                    _buildSessionsSelection(),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _numberOfTeamsController,
-                      label: 'Number of Teams',
-                      // hint: 'Enter number of teams',
-                      keyboardType: TextInputType.number,
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildTextField(
-                      controller: _oversPerMatchController,
-                      label: 'Overs Per Match',
-                      // hint: 'Enter overs per match',
-                      keyboardType: TextInputType.number,
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildDropdown(
-                      label: 'Ball Type',
-                      value: _ballTypeController.text,
-                      items: _ballTypeOptions,
-                      onChanged: (value) {
-                        _ballTypeController.text = value!;
-                      },
-                    ),
-                    _buildTextField(
-                      controller: _entryFeeController,
-                      label: 'Entry Fee',
-                      // hint: 'Enter entry fee amount',
-                      keyboardType: TextInputType.number,
-                      validator: _requiredFieldValidator,
-                    ),
-                    _buildTextField(
-                      controller: _winningPrizeController,
-                      label: 'Winning Prize (Optional)',
-                      // hint: 'Enter winning prize details',
-                    ),
-                    _buildTextField(
-                      controller: _playerEligibilityController,
-                      label: 'Player Eligibility (Optional)',
-                      // hint: 'Enter eligibility criteria',
-                    ),
-                    _buildTextField(
-                      controller: _teamCompositionController,
-                      label: 'Team Composition (players per team)',
-                      // hint: 'Enter number of players',
-                      keyboardType: TextInputType.number,
-                      validator: _requiredFieldValidator,
-                    ),
-                    // const SizedBox(height: 16),
-                    SwitchListTile(
-                      title: const Text('Umpire Provided'),
-                      subtitle:
-                          const Text('Will you provide umpires for matches?'),
-                      value: _umpireProvided,
-                      onChanged: (value) {
-                        setState(() {
-                          _umpireProvided = value;
-                        });
-                      },
-                      secondary: null, // Removed icon
-                    ),
-                    SwitchListTile(
-                      title: const Text('Auto-Generate Fixtures'),
-                      subtitle:
-                          const Text('Automatically create match fixtures'),
-                      value: _autoFixtureGeneration,
-                      onChanged: (value) {
-                        setState(() {
-                          _autoFixtureGeneration = value;
-                        });
-                      },
-                      secondary: null, // Removed icon
-                    ),
-                    const SizedBox(height: 32),
-                    Center(
-                      // Centered the button
-                      child: _buildSubmitButton(),
-                    ),
-                    const SizedBox(height: 24),
                   ],
-                ),
+                  _buildTextField(
+                    controller: _tournamentNameController,
+                    label: 'Tournament Name',
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildDropdown(
+                    label: 'Tournament Type',
+                    value: _tournamentTypeController.text,
+                    items: _tournamentTypeOptions,
+                    onChanged: (value) {
+                      _tournamentTypeController.text = value!;
+                    },
+                  ),
+                  _buildTextField(
+                    controller: _locationController,
+                    label: 'Location',
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildTextField(
+                    controller: _groundNameController,
+                    label: 'Ground Name (Optional)',
+                  ),
+                  _buildTextField(
+                    controller: _organizerNameController,
+                    label: 'Organizer Name',
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildTextField(
+                    controller: _phoneController,
+                    label: 'Phone (Optional)',
+                    keyboardType: TextInputType.phone,
+                  ),
+                  _buildTextField(
+                    controller: _emailController,
+                    label: 'Email (Optional)',
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  _buildDatePicker(
+                    label: 'Start Date',
+                    value: _dateFormat.format(_startDate),
+                    onTap: () => _selectDate(context, 'start'),
+                  ),
+                  _buildDatePicker(
+                    label: 'End Date',
+                    value: _dateFormat.format(_endDate),
+                    onTap: () => _selectDate(context, 'end'),
+                  ),
+                  _buildDatePicker(
+                    label: 'Last Date to Register',
+                    value: _dateFormat.format(_lastDateToRegister),
+                    onTap: () => _selectDate(context, 'register'),
+                  ),
+                  _buildDropdown(
+                    label: 'Match Days Preference',
+                    value: _matchDaysPreference,
+                    items: _matchDaysOptions,
+                    onChanged: (value) {
+                      setState(() {
+                        _matchDaysPreference = value!;
+                      });
+                    },
+                  ),
+                  _buildSessionsSelection(),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _numberOfTeamsController,
+                    label: 'Number of Teams',
+                    keyboardType: TextInputType.number,
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildTextField(
+                    controller: _oversPerMatchController,
+                    label: 'Overs Per Match',
+                    keyboardType: TextInputType.number,
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildDropdown(
+                    label: 'Ball Type',
+                    value: _ballTypeController.text,
+                    items: _ballTypeOptions,
+                    onChanged: (value) {
+                      _ballTypeController.text = value!;
+                    },
+                  ),
+                  _buildTextField(
+                    controller: _entryFeeController,
+                    label: 'Entry Fee',
+                    keyboardType: TextInputType.number,
+                    validator: _requiredFieldValidator,
+                  ),
+                  _buildTextField(
+                    controller: _winningPrizeController,
+                    label: 'Winning Prize (Optional)',
+                  ),
+                  _buildTextField(
+                    controller: _playerEligibilityController,
+                    label: 'Player Eligibility (Optional)',
+                  ),
+                  _buildTextField(
+                    controller: _teamCompositionController,
+                    label: 'Team Composition (players per team)',
+                    keyboardType: TextInputType.number,
+                    validator: _requiredFieldValidator,
+                  ),
+                  SwitchListTile(
+                    title: const Text('Umpire Provided'),
+                    subtitle:
+                        const Text('Will you provide umpires for matches?'),
+                    value: _umpireProvided,
+                    onChanged: (value) {
+                      setState(() {
+                        _umpireProvided = value;
+                      });
+                    },
+                    secondary: null,
+                  ),
+                  SwitchListTile(
+                    title: const Text('Auto-Generate Fixtures'),
+                    subtitle: const Text('Automatically create match fixtures'),
+                    value: _autoFixtureGeneration,
+                    onChanged: (value) {
+                      setState(() {
+                        _autoFixtureGeneration = value;
+                      });
+                    },
+                    secondary: null,
+                  ),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: _buildSubmitButton(),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-    );
+          );
   }
 
   // Extracted common validator function
@@ -465,15 +468,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
-    // required String hint,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
-    // Reuse the decoration for better performance
     final decoration = InputDecoration(
       labelText: label,
-      // hintText: hint,
-      // Removed prefixIcon
       border: _normalBorder,
       enabledBorder: _normalBorder,
       focusedBorder: _focusedBorder,
@@ -512,7 +511,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          // Removed prefixIcon
           border: _normalBorder,
           enabledBorder: _normalBorder,
           focusedBorder: _focusedBorder,
@@ -537,7 +535,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            // Removed prefixIcon
             border: _normalBorder,
             enabledBorder: _normalBorder,
             filled: true,
@@ -551,7 +548,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     );
   }
 
-  // Extracted method for sessions selection
   Widget _buildSessionsSelection() {
     return Wrap(
       spacing: 8,
@@ -561,10 +557,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           label: Text(session),
           selected: isSelected,
           onSelected: (selected) => _toggleSession(session),
-          backgroundColor: Colors.white, // Always white
-          selectedColor: Colors.white, // Even when selected, stays white
+          backgroundColor: Colors.white,
+          selectedColor: Colors.white,
           side: BorderSide(
-            color: isSelected ? Colors.red : Colors.grey, // Border changes
+            color: isSelected ? Colors.red : Colors.grey,
             width: 1.5,
           ),
           checkmarkColor: Colors.red,
@@ -576,7 +572,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     );
   }
 
-  // Extracted method for submit button
   Widget _buildSubmitButton() {
     return SizedBox(
       width: 200,
@@ -585,12 +580,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
-          foregroundColor: Colors.white, // Added foreground color
-          padding: EdgeInsets.symmetric(vertical: 16), // Added padding
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30), // Matching border radius
+            borderRadius: BorderRadius.circular(30),
           ),
-          elevation: 5, // Added elevation
+          elevation: 5,
         ),
         child: Text(
           'CREATE',

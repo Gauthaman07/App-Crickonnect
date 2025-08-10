@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import './ground_details_screen.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter/cupertino.dart';
 
 class BookGroundTab extends StatefulWidget {
   const BookGroundTab({super.key});
@@ -106,12 +106,11 @@ class _BookGroundTabState extends State<BookGroundTab> {
           Expanded(
             child: isLoading
                 ? Center(
-                    child: LoadingAnimationWidget.threeArchedCircle(
-                      color: Colors.red, // Main color for the arcs
-                      size: 40, // Size of the loader
+                    child: CupertinoActivityIndicator(
+                      radius: 12, // Small size
+                      color: Colors.grey.shade600, // Metal silver color
                     ),
                   )
-// Simple circle loader
                 : grounds.isEmpty
                     ? Center(child: Text("No grounds found"))
                     : ListView.builder(

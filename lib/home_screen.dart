@@ -3,6 +3,7 @@ import 'card_widget.dart';
 import './myteam/my_team_page.dart';
 import '../services/api_service.dart';
 import 'booking_screen.dart';
+import 'package:flutter/cupertino.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateToTab;
@@ -56,18 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
           "Crickonnect",
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 16,
-            color: Colors.black,
+            fontSize: 15,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF15151E),
         automaticallyImplyLeading: false,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F0ED),
       body: isLoading
           ? Center(
-              child: CircularProgressIndicator(
-                color: Colors.red,
+              child: CupertinoActivityIndicator(
+                radius: 12, // Small size
+                color: Colors.grey.shade600, // Metal silver color
               ),
             )
           : Column(
@@ -91,8 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           borderRadius: BorderRadius.circular(30),
                           child: Image.network(
                             teamData!['team']['teamLogo'] ?? "",
-                            height: 60,
-                            width: 60,
+                            height: 50,
+                            width: 50,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
@@ -118,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             (teamData!['team']['teamName'] ?? "My Team")
                                 .toUpperCase(), // Added .toUpperCase()
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),

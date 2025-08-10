@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'signin.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter/cupertino.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -156,9 +156,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       child: isLoading
-                          ? LoadingAnimationWidget.threeArchedCircle(
-                              color: Colors.white, // Main color for the arcs
-                              size: 40, // Size of the loader
+                          ? CupertinoActivityIndicator(
+                              radius:
+                                  12, // Small size (consistent with sign-in button)
+                              color: Colors
+                                  .white, // White color for contrast on red button
                             )
                           : Text(
                               'Sign Up',

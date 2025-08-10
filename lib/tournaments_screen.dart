@@ -3,8 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'create_tournament.dart';
 import '/services/api_service.dart';
 import 'register_tournament.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'create_tournament.dart';
 
 class TournamentsScreen extends StatefulWidget {
   const TournamentsScreen({super.key});
@@ -13,7 +14,8 @@ class TournamentsScreen extends StatefulWidget {
   State<TournamentsScreen> createState() => _TournamentsScreenState();
 }
 
-class _TournamentsScreenState extends State<TournamentsScreen> {
+class _TournamentsScreenState extends State<TournamentsScreen>
+    with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final List<String> locations = [
     "Tirupur",
@@ -32,11 +34,15 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   late ScrollController _scrollController;
   bool _isScrolled = false;
 
+  // Tab controller for pill selector
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     _fetchTournaments(selectedLocation);
   }
 
@@ -44,6 +50,7 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -156,59 +163,157 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F0ED),
       appBar: AppBar(
-        backgroundColor: _isScrolled ? Colors.red : Colors.white,
         title: Text(
-          'Tournaments',
+          "Tournaments",
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 16,
-            color: _isScrolled ? Colors.white : Colors.black,
+            fontSize: 15,
+            color: Colors.white,
           ),
         ),
-        elevation: 0,
-        iconTheme: IconThemeData(
-          color: _isScrolled ? Colors.white : Colors.black,
-        ),
+        backgroundColor: const Color(0xFF15151E),
+        automaticallyImplyLeading: false,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await _fetchTournaments(selectedLocation);
-        },
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
 
-              // Location Selector
-              _buildLocationSelector(),
+          // Pill Tab Selector
+          _buildPillTabSelector(),
 
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-              // User Tournaments Section
-              if (userTournaments.isNotEmpty) ...[
-                // _buildSectionHeader('Your Tournaments'),
-                _buildUserTournamentsList(),
-                const SizedBox(height: 16),
+          // Conditional Location Selector (only for Register tab)
+          AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, child) {
+              if (_tabController.index == 1) {
+                // Only show in Register tab (index 1)
+                return Column(
+                  children: [
+                    _buildLocationSelector(),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }
+              return const SizedBox.shrink(); // Hide when in Create tab
+            },
+          ),
+
+          // Tab Content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                CreateTournamentScreen(isEmbedded: true),
+                // Register Tab
+                RefreshIndicator(
+                  onRefresh: () async {
+                    await _fetchTournaments(selectedLocation);
+                  },
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // User Tournaments Section
+                        if (userTournaments.isNotEmpty) ...[
+                          _buildUserTournamentsList(),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Other Tournaments Section
+                        _buildOtherTournamentsContent(),
+
+                        const SizedBox(height: 80),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-
-              // Other Tournaments Section
-              _buildOtherTournamentsContent(),
-
-              const SizedBox(height: 80),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
-      floatingActionButton: _buildCreateTournamentButton(),
     );
   }
 
-  // UI Components
+  // Pill Tab Selector
+  Widget _buildPillTabSelector() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, child) {
+          return Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _tabController.animateTo(0),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _tabController.index == 0
+                          ? Colors.black
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      "Create",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: _tabController.index == 0
+                            ? Colors.white
+                            : Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _tabController.animateTo(1),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _tabController.index == 1
+                          ? Colors.black
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      "Register",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: _tabController.index == 1
+                            ? Colors.white
+                            : Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // UI Components (rest of your existing methods remain the same)
 
   Widget _buildLocationSelector() {
     return Padding(
@@ -255,11 +360,11 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   Widget _buildUserTournamentsList() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: 400, // ⬅️ set your desired height here
+      height: 400,
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero, // remove side gaps
+        padding: EdgeInsets.zero,
         itemCount: userTournaments.length,
         itemBuilder: (context, index) {
           final tournament = userTournaments[index];
@@ -406,9 +511,9 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: LoadingAnimationWidget.threeArchedCircle(
-            color: Colors.red,
-            size: 40,
+          child: CupertinoActivityIndicator(
+            radius: 12, // Small size (consistent with other screens)
+            color: Colors.grey.shade600, // Metal silver color
           ),
         ),
       );
@@ -460,7 +565,6 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tournament Type (Top)
               Row(
                 children: [
                   Text(
@@ -477,8 +581,6 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Tournament Name, Location, Start Date
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -487,7 +589,6 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Left side - Tournament name & location
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,7 +614,6 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Right side - Start Date
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -530,10 +630,7 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Entry Fee
               Row(
                 children: [
                   const Icon(Icons.monetization_on,
@@ -551,21 +648,6 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCreateTournamentButton() {
-    return FloatingActionButton.extended(
-      onPressed: _navigateToCreateTournament,
-      backgroundColor: Colors.red,
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: Text(
-        'Create Tournament',
-        style: GoogleFonts.montserrat(
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
         ),
       ),
     );
