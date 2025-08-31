@@ -3,6 +3,154 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+
+// Custom Toggle Switch Widget
+class CustomToggleSwitch extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color? activeColor;
+  final Color? inactiveColor;
+
+  const CustomToggleSwitch({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+    this.activeColor,
+    this.inactiveColor,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: value
+              ? (activeColor ?? Colors.green).withOpacity(0.2)
+              : Colors.grey.withOpacity(0.2),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: () {
+              onChanged(!value);
+              HapticFeedback.lightImpact();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 56,
+              height: 32,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: value
+                      ? [
+                          activeColor ?? Colors.green,
+                          (activeColor ?? Colors.green).withOpacity(0.8),
+                        ]
+                      : [
+                          inactiveColor ?? Colors.grey[300]!,
+                          inactiveColor ?? Colors.grey[400]!,
+                        ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: value
+                        ? (activeColor ?? Colors.green).withOpacity(0.3)
+                        : Colors.grey.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    top: 2,
+                    left: value ? 26 : 2,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            spreadRadius: 0.5,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: value
+                          ? Icon(
+                              Icons.check,
+                              size: 16,
+                              color: activeColor ?? Colors.green,
+                            )
+                          : Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.grey[500],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class CreateTournamentScreen extends StatefulWidget {
   final bool isEmbedded; // Add this parameter
@@ -296,8 +444,6 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
             ),
           )
         : Form(
-            // ... rest of your form code
-
             key: _formKey,
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -318,11 +464,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                   ],
                   _buildTextField(
                     controller: _tournamentNameController,
-                    label: 'Tournament Name',
+                    label: 'Tournament name',
                     validator: _requiredFieldValidator,
                   ),
                   _buildDropdown(
-                    label: 'Tournament Type',
+                    label: 'Tournament type',
                     value: _tournamentTypeController.text,
                     items: _tournamentTypeOptions,
                     onChanged: (value) {
@@ -336,11 +482,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                   ),
                   _buildTextField(
                     controller: _groundNameController,
-                    label: 'Ground Name (Optional)',
+                    label: 'Ground name (Optional)',
                   ),
                   _buildTextField(
                     controller: _organizerNameController,
-                    label: 'Organizer Name',
+                    label: 'Organizer name',
                     validator: _requiredFieldValidator,
                   ),
                   _buildTextField(
@@ -354,22 +500,22 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                   _buildDatePicker(
-                    label: 'Start Date',
+                    label: 'Start date',
                     value: _dateFormat.format(_startDate),
                     onTap: () => _selectDate(context, 'start'),
                   ),
                   _buildDatePicker(
-                    label: 'End Date',
+                    label: 'End date',
                     value: _dateFormat.format(_endDate),
                     onTap: () => _selectDate(context, 'end'),
                   ),
                   _buildDatePicker(
-                    label: 'Last Date to Register',
+                    label: 'Last date to register',
                     value: _dateFormat.format(_lastDateToRegister),
                     onTap: () => _selectDate(context, 'register'),
                   ),
                   _buildDropdown(
-                    label: 'Match Days Preference',
+                    label: 'Match days preference',
                     value: _matchDaysPreference,
                     items: _matchDaysOptions,
                     onChanged: (value) {
@@ -382,18 +528,18 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _numberOfTeamsController,
-                    label: 'Number of Teams',
+                    label: 'Number of teams',
                     keyboardType: TextInputType.number,
                     validator: _requiredFieldValidator,
                   ),
                   _buildTextField(
                     controller: _oversPerMatchController,
-                    label: 'Overs Per Match',
+                    label: 'Overs per match',
                     keyboardType: TextInputType.number,
                     validator: _requiredFieldValidator,
                   ),
                   _buildDropdown(
-                    label: 'Ball Type',
+                    label: 'Ball type',
                     value: _ballTypeController.text,
                     items: _ballTypeOptions,
                     onChanged: (value) {
@@ -402,47 +548,50 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                   ),
                   _buildTextField(
                     controller: _entryFeeController,
-                    label: 'Entry Fee',
+                    label: 'Entry fee',
                     keyboardType: TextInputType.number,
                     validator: _requiredFieldValidator,
                   ),
                   _buildTextField(
                     controller: _winningPrizeController,
-                    label: 'Winning Prize (Optional)',
+                    label: 'Winning prize (Optional)',
                   ),
                   _buildTextField(
                     controller: _playerEligibilityController,
-                    label: 'Player Eligibility (Optional)',
+                    label: 'Player eligibility (Optional)',
                   ),
                   _buildTextField(
                     controller: _teamCompositionController,
-                    label: 'Team Composition (players per team)',
+                    label: 'Team composition (players per team)',
                     keyboardType: TextInputType.number,
                     validator: _requiredFieldValidator,
                   ),
-                  SwitchListTile(
-                    title: const Text('Umpire Provided'),
-                    subtitle:
-                        const Text('Will you provide umpires for matches?'),
+
+                  // Replace SwitchListTile with CustomToggleSwitch
+                  CustomToggleSwitch(
+                    title: 'Umpires',
+                    subtitle: 'Will you provide umpires for matches?',
                     value: _umpireProvided,
+                    activeColor: Colors.green,
                     onChanged: (value) {
                       setState(() {
                         _umpireProvided = value;
                       });
                     },
-                    secondary: null,
                   ),
-                  SwitchListTile(
-                    title: const Text('Auto-Generate Fixtures'),
-                    subtitle: const Text('Automatically create match fixtures'),
+
+                  CustomToggleSwitch(
+                    title: 'Auto-Generate Fixtures',
+                    subtitle: 'Automatically create match fixtures',
                     value: _autoFixtureGeneration,
+                    activeColor: Colors.green,
                     onChanged: (value) {
                       setState(() {
                         _autoFixtureGeneration = value;
                       });
                     },
-                    secondary: null,
                   ),
+
                   const SizedBox(height: 32),
                   Center(
                     child: _buildSubmitButton(),
@@ -471,23 +620,28 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
-    final decoration = InputDecoration(
-      labelText: label,
-      border: _normalBorder,
-      enabledBorder: _normalBorder,
-      focusedBorder: _focusedBorder,
-      filled: true,
-      fillColor: Colors.grey[50],
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    final normalBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: Colors.black, width: 1),
     );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        decoration: decoration,
         keyboardType: keyboardType,
         validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          border: normalBorder,
+          enabledBorder: normalBorder,
+          focusedBorder: normalBorder,
+          labelStyle: const TextStyle(color: Colors.black),
+        ),
       ),
     );
   }
@@ -498,6 +652,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required List<String> items,
     required void Function(String?) onChanged,
   }) {
+    final normalBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Colors.black, width: 1),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
@@ -511,13 +670,14 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          border: _normalBorder,
-          enabledBorder: _normalBorder,
-          focusedBorder: _focusedBorder,
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: Colors.white,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          border: normalBorder,
+          enabledBorder: normalBorder,
+          focusedBorder: normalBorder,
+          labelStyle: const TextStyle(color: Colors.black),
         ),
       ),
     );
@@ -528,6 +688,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required String value,
     required VoidCallback onTap,
   }) {
+    final normalBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Colors.black, width: 1),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InkWell(
@@ -535,14 +700,19 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            border: _normalBorder,
-            enabledBorder: _normalBorder,
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: Colors.white,
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            border: normalBorder,
+            enabledBorder: normalBorder,
+            focusedBorder: normalBorder,
+            labelStyle: const TextStyle(color: Colors.black),
           ),
-          child: Text(value),
+          child: Text(
+            value,
+            style: const TextStyle(color: Colors.black),
+          ),
         ),
       ),
     );
@@ -560,12 +730,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           backgroundColor: Colors.white,
           selectedColor: Colors.white,
           side: BorderSide(
-            color: isSelected ? Colors.red : Colors.grey,
+            color: isSelected ? Colors.green : Colors.black,
             width: 1.5,
           ),
-          checkmarkColor: Colors.red,
+          checkmarkColor: Colors.green,
           labelStyle: TextStyle(
-            color: isSelected ? Colors.red[800] : Colors.black,
+            color: isSelected ? Colors.green[800] : Colors.black,
           ),
         );
       }).toList(),
@@ -575,23 +745,24 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   Widget _buildSubmitButton() {
     return SizedBox(
       width: 200,
-      height: 45,
+      height: 50, // increased from 45
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 8), // reduced padding
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
           elevation: 5,
         ),
-        child: Text(
+        child: const Text(
           'CREATE',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
+            fontSize: 16, // optional to make text more visible
           ),
         ),
       ),

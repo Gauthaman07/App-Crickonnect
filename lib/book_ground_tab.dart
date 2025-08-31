@@ -146,11 +146,10 @@ class GroundCard extends StatelessWidget {
         child: Card(
           margin: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
           elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           color: Colors.white,
           child: Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -179,20 +178,21 @@ class GroundCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         SizedBox(height: 4),
                         Text(
                           ground['ownedByTeam'] != null
-                              ? ground['ownedByTeam']['teamName']
-                              : 'No Team',
-                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                              ? ground['ownedByTeam']['teamName'].toUpperCase()
+                              : 'NO TEAM',
+                          style: TextStyle(fontSize: 14, color: Colors.black),
                         ),
                         Text(
-                          ground['location'],
-                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                          ground['location'].toUpperCase(),
+                          style: TextStyle(fontSize: 14, color: Colors.black),
                         ),
+
                         // Text(
                         //   "₹${ground['fee']}",
                         //   style: TextStyle(

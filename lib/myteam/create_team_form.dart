@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '/services/api_service.dart';
+import 'package:flutter/services.dart';
 
 class CreateTeamForm extends StatefulWidget {
   final VoidCallback onTeamCreated;
@@ -164,23 +165,24 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // removes the back arrow
         title: const Text(
           'Create Team',
           style: TextStyle(
             fontFamily: 'Boldonse',
-            fontSize: 18,
-            color: Colors.white, // White text
+            fontSize: 15,
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: Colors.red, // Red background
+        backgroundColor: const Color(0xFF15151E),
         foregroundColor: Colors.white,
         elevation: 0,
-        toolbarHeight: 70, // Increased height
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white), // White icons
+        toolbarHeight: 70,
+        centerTitle: false, // aligns title to the left
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      backgroundColor: Colors.white, // White background for the form
+      backgroundColor: const Color(0xFFF5F0ED),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -233,56 +235,73 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                 SizedBox(height: 30),
 
                 // Team Basic Information
-                Text(
-                  "TEAM INFORMATION",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                    letterSpacing: 1.5,
-                  ),
-                ),
+                // Text(
+                //   "TEAM INFORMATION",
+                //   style: TextStyle(
+                //     fontSize: 14,
+                //     fontWeight: FontWeight.bold,
+                //     color: Colors.grey[700],
+                //     letterSpacing: 1.5,
+                //   ),
+                // ),
                 SizedBox(height: 15),
                 TextFormField(
                   controller: teamNameController,
                   decoration: InputDecoration(
-                    labelText: 'Team Name',
+                    labelText: 'Team name',
+                    labelStyle:
+                        TextStyle(color: Colors.grey), // normal label color
+                    floatingLabelStyle:
+                        TextStyle(color: Colors.black), // color when focused
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black, width: 1),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.black, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.red, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                          color: Colors.black, width: 1), // no color change
                     ),
                   ),
                   validator: (value) =>
                       value!.isEmpty ? 'Enter team name' : null,
                 ),
+
                 SizedBox(height: 16),
 
                 // Location Dropdown
                 DropdownButtonFormField<String>(
                   value: teamLocation,
                   decoration: InputDecoration(
-                    labelText: 'Team Location',
+                    labelText: 'Team location',
+                    labelStyle: TextStyle(color: Colors.grey), // normal label
+                    floatingLabelStyle:
+                        TextStyle(color: Colors.black), // label on focus
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                          color: Colors.black, width: 1), // black border
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                          color: Colors.black, width: 1), // black border
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                          color: Colors.black, width: 1), // stays black
                     ),
                   ),
+                  dropdownColor: Colors.white, // popup background
                   items: [
                     'Tirupur',
                     'Coimbatore',
@@ -290,71 +309,110 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     'Salem',
                     'Dindigul',
                     'Trichy',
-                  ]
-                      .map((loc) =>
-                          DropdownMenuItem(value: loc, child: Text(loc)))
-                      .toList(),
+                  ].map((loc) {
+                    return DropdownMenuItem(
+                      value: loc,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width *
+                            0.6, // popup width reduced
+                        child: Text(loc, overflow: TextOverflow.ellipsis),
+                      ),
+                    );
+                  }).toList(),
                   onChanged: (value) => setState(() => teamLocation = value),
                   validator: (value) =>
                       value == null ? 'Select location' : null,
                 ),
+
                 SizedBox(height: 30),
 
                 // Ground Section
-                SwitchListTile(
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  tileColor: Colors.white,
                   title: Text(
-                    "Does your team have its own ground?",
+                    "You have own ground?",
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 16,
                     ),
                   ),
-                  value: hasOwnGround,
-                  onChanged: (value) => setState(() => hasOwnGround = value),
-                  activeColor: Colors.red,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  trailing: Switch(
+                    value: hasOwnGround,
+                    onChanged: (value) {
+                      HapticFeedback.lightImpact(); // ✅ haptic feedback
+                      setState(() => hasOwnGround = value);
+                    },
+                    activeTrackColor: Colors.green, // background when ON
+                    inactiveTrackColor: Colors.grey, // background when OFF
+                    activeColor: Colors.white, // thumb (button) color
+                    inactiveThumbColor: Colors.white, // thumb stays white
                   ),
-                  tileColor: Colors.white,
                 ),
 
                 if (hasOwnGround) ...[
-                  SizedBox(height: 24),
-                  Text(
-                    "GROUND DETAILS",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
-                      letterSpacing: 1.5,
-                    ),
-                  ),
+                  // SizedBox(height: 24),
+                  // Text(
+                  //   "GROUND DETAILS",
+                  //   style: TextStyle(
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.grey[700],
+                  //     letterSpacing: 1.5,
+                  //   ),
+                  // ),
                   SizedBox(height: 15),
                   TextFormField(
                     controller: groundNameController,
                     decoration: InputDecoration(
-                      labelText: 'Ground Name',
+                      labelText: 'Ground name',
+                      labelStyle: TextStyle(color: Colors.grey), // normal state
+                      floatingLabelStyle:
+                          TextStyle(color: Colors.black), // on focus
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                            color: Colors.black, width: 1), // stays black
                       ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Enter ground name' : null,
                   ),
+
                   SizedBox(height: 16),
+                  // Ground Description
                   TextFormField(
                     controller: groundDescController,
                     decoration: InputDecoration(
-                      labelText: 'Ground Description',
+                      labelText: 'Ground description',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
                     maxLines: 2,
@@ -362,16 +420,28 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                         value!.isEmpty ? 'Enter ground description' : null,
                   ),
                   SizedBox(height: 16),
+
+// Google Map Link
                   TextFormField(
                     controller: groundLocationController,
                     decoration: InputDecoration(
-                      labelText: 'Google Map Link',
+                      labelText: 'Google map link',
                       hintText: 'Paste Google Maps URL',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
                     validator: (value) =>
@@ -379,32 +449,42 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                   ),
                   SizedBox(height: 16),
 
-                  // Ground Fees
+// Ground Fees
                   TextFormField(
                     controller: groundFeesController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Ground Fees (₹ per match)',
+                      labelText: 'Ground fees (₹ per match)',
+                      labelStyle: TextStyle(color: Colors.grey),
+                      floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Enter ground fees' : null,
                   ),
-                  SizedBox(height: 16),
+
+                  SizedBox(height: 20),
 
                   // Ground Image Upload
                   Text(
-                    "GROUND IMAGE",
+                    "Ground Image",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
-                      letterSpacing: 1.5,
+                      color: Colors.black,
                     ),
                   ),
                   SizedBox(height: 12),
@@ -442,19 +522,18 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
 
                   // Multi-select Facilities
                   Text(
-                    "AVAILABLE FACILITIES",
+                    "Avaialable Facilities",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
-                      letterSpacing: 1.5,
+                      color: Colors.black,
                     ),
                   ),
                   SizedBox(height: 12),
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      // color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Wrap(
@@ -467,16 +546,17 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                           label: Text(
                             facility,
                             style: TextStyle(
-                              color: isSelected ? Colors.red : Colors.black,
+                              color: isSelected ? Colors.green : Colors.black,
                             ),
                           ),
                           selected: isSelected,
-                          backgroundColor: Colors.transparent,
-                          selectedColor: Colors.transparent,
-                          checkmarkColor: Colors.red,
+                          backgroundColor: Colors.white, // normal state = white
+                          selectedColor: Colors.white, // selected state = white
+                          checkmarkColor: Colors.green,
                           side: BorderSide(
-                            color:
-                                isSelected ? Colors.red : Colors.grey.shade300,
+                            color: isSelected
+                                ? Colors.green
+                                : Colors.grey.shade300,
                             width: 1.5,
                           ),
                           onSelected: (bool selected) {

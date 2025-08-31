@@ -449,6 +449,44 @@ class ApiService {
     }
   }
 
+  // Get all tournaments created by the user (with optional date filtering)
+  Future<Map<String, dynamic>> getMyTournaments({bool includeAll = true}) async {
+    // Use query parameter to control date filtering
+    String queryParam = includeAll ? '?includeAll=true' : '';
+    final url = Uri.parse('$baseUrl/tournaments/my-tournaments$queryParam');
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("token");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("My tournaments response: ${response.body}");
+        final Map<String, dynamic> data = json.decode(response.body);
+        return {
+          'userTournaments': data['tournaments'] ?? data['userTournaments'] ?? [],
+        };
+      } else if (response.statusCode == 404) {
+        print('No tournaments found for user.');
+        return {
+          'userTournaments': [],
+        };
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        // If this endpoint doesn't exist, throw error to trigger fallback
+        throw Exception('My tournaments endpoint not available: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      throw Exception('Error getting user tournaments: $e');
+    }
+  }
+
   // Get user ID from shared preferences
   Future<String?> _getUserId() async {
     final prefs = await SharedPreferences.getInstance();

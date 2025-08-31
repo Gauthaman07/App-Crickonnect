@@ -48,6 +48,7 @@ dependencies:
   url_launcher: ^6.2.5 
   confetti: ^0.7.0
   flutter_local_notifications: ^17.1.2
+  path_provider: ^2.1.4
 
 
 flutter_icons:
@@ -60,9 +61,16 @@ flutter_icons:
 flutter_native_splash:
   color: "#FFFFFF" # Background color of splash
   image: assets/cklogo.png  # Your logo path
+  image_dark: assets/cklogo.png  # Dark mode logo (optional)
+  branding: assets/cklogo.png  # Alternative branding image
+  branding_mode: bottom  # Position branding at bottom
+  android_gravity: center  # Center the image on Android
+  ios_content_mode: scaleAspectFit  # Scale to fit on iOS
+  web_image_mode: center  # Center on web
   android_12:
     image: assets/cklogo.png  # Add for Android 12+
     icon_background_color: "#FFFFFF"
+    image_dark: assets/cklogo.png  # Dark mode for Android 12+
   fullscreen: true
 
 dev_dependencies:
