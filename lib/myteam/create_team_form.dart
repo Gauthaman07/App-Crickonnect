@@ -4,6 +4,153 @@ import 'package:image_picker/image_picker.dart';
 import '/services/api_service.dart';
 import 'package:flutter/services.dart';
 
+// Custom Toggle Switch Widget (same as create_tournament.dart)
+class CustomToggleSwitch extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color? activeColor;
+  final Color? inactiveColor;
+
+  const CustomToggleSwitch({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+    this.activeColor,
+    this.inactiveColor,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: value
+              ? (activeColor ?? Colors.green).withOpacity(0.2)
+              : Colors.grey.withOpacity(0.2),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: () {
+              onChanged(!value);
+              HapticFeedback.lightImpact();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 56,
+              height: 32,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: value
+                      ? [
+                          activeColor ?? Colors.green,
+                          (activeColor ?? Colors.green).withOpacity(0.8),
+                        ]
+                      : [
+                          inactiveColor ?? Colors.grey[300]!,
+                          inactiveColor ?? Colors.grey[400]!,
+                        ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: value
+                        ? (activeColor ?? Colors.green).withOpacity(0.3)
+                        : Colors.grey.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    top: 2,
+                    left: value ? 26 : 2,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            spreadRadius: 0.5,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: value
+                          ? Icon(
+                              Icons.check,
+                              size: 16,
+                              color: activeColor ?? Colors.green,
+                            )
+                          : Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.grey[500],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class CreateTeamForm extends StatefulWidget {
   final VoidCallback onTeamCreated;
 
@@ -254,17 +401,17 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     floatingLabelStyle:
                         TextStyle(color: Colors.black), // color when focused
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Colors.transparent,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(color: Colors.black, width: 1),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(color: Colors.black, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(
                           color: Colors.black, width: 1), // no color change
                     ),
@@ -284,19 +431,19 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                     floatingLabelStyle:
                         TextStyle(color: Colors.black), // label on focus
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Colors.transparent,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(
                           color: Colors.black, width: 1), // black border
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(
                           color: Colors.black, width: 1), // black border
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide(
                           color: Colors.black, width: 1), // stays black
                     ),
@@ -327,30 +474,16 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                 SizedBox(height: 30),
 
                 // Ground Section
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  tileColor: Colors.white,
-                  title: Text(
-                    "You have own ground?",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                  ),
-                  trailing: Switch(
-                    value: hasOwnGround,
-                    onChanged: (value) {
-                      HapticFeedback.lightImpact(); // ✅ haptic feedback
-                      setState(() => hasOwnGround = value);
-                    },
-                    activeTrackColor: Colors.green, // background when ON
-                    inactiveTrackColor: Colors.grey, // background when OFF
-                    activeColor: Colors.white, // thumb (button) color
-                    inactiveThumbColor: Colors.white, // thumb stays white
-                  ),
+                CustomToggleSwitch(
+                  title: 'Own Ground',
+                  subtitle: 'Do you have your own cricket ground?',
+                  value: hasOwnGround,
+                  activeColor: Colors.green,
+                  onChanged: (value) {
+                    setState(() {
+                      hasOwnGround = value;
+                    });
+                  },
                 ),
 
                 if (hasOwnGround) ...[
@@ -373,17 +506,17 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       floatingLabelStyle:
                           TextStyle(color: Colors.black), // on focus
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(
                             color: Colors.black, width: 1), // stays black
                       ),
@@ -401,17 +534,17 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       labelStyle: TextStyle(color: Colors.grey),
                       floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
@@ -430,7 +563,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       labelStyle: TextStyle(color: Colors.grey),
                       floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.black, width: 1),
@@ -458,7 +591,7 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       labelStyle: TextStyle(color: Colors.grey),
                       floatingLabelStyle: TextStyle(color: Colors.black),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.black, width: 1),

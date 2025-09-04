@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'signin.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -21,6 +22,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool isLoading = false;
   bool isButtonEnabled = false;
+  bool isPasswordVisible = false;
+  String? emailError;
+  String? mobileError;
 
   @override
   void initState() {
@@ -31,12 +35,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
     passwordController.addListener(_validateForm);
   }
 
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(email);
+  }
+
+  bool _isValidMobile(String mobile) {
+    return mobile.length >= 10 && mobile.length <= 15;
+  }
+
   void _validateForm() {
     setState(() {
+      // Email validation
+      if (emailController.text.isNotEmpty &&
+          !_isValidEmail(emailController.text)) {
+        emailError = "Enter a valid email address";
+      } else {
+        emailError = null;
+      }
+
+      // Mobile validation
+      if (mobileController.text.isNotEmpty &&
+          !_isValidMobile(mobileController.text)) {
+        mobileError = "Mobile number should be 10 digits";
+      } else {
+        mobileError = null;
+      }
+
       isButtonEnabled = nameController.text.isNotEmpty &&
           mobileController.text.isNotEmpty &&
           emailController.text.isNotEmpty &&
-          passwordController.text.isNotEmpty;
+          passwordController.text.isNotEmpty &&
+          emailError == null &&
+          mobileError == null;
     });
   }
 
@@ -66,7 +97,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
         await prefs.setBool('isLoggedIn', true);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signup Successful! Please log in.")),
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Signup Successful! Please log in.",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: EdgeInsets.all(16),
+            elevation: 6,
+            duration: Duration(seconds: 3),
+          ),
         );
 
         Navigator.pushReplacement(
@@ -75,12 +131,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData["message"] ?? "Signup failed")),
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    responseData["message"] ?? "Signup failed",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: EdgeInsets.all(16),
+            elevation: 6,
+            duration: Duration(seconds: 4),
+          ),
         );
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Something went wrong. Please try again.")),
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Something went wrong. Please try again.",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.orange[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: EdgeInsets.all(16),
+          elevation: 6,
+          duration: Duration(seconds: 4),
+        ),
       );
     } finally {
       setState(() => isLoading = false);
@@ -135,11 +241,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 20),
-                  _buildTextField(nameController, "Full Name"),
+                  _buildTextField(nameController, "Full name"),
                   SizedBox(height: 15),
-                  _buildTextField(mobileController, "Mobile Number"),
+                  _buildTextField(mobileController, "Mobile number",
+                      isMobile: true),
                   SizedBox(height: 15),
-                  _buildTextField(emailController, "Email Address"),
+                  _buildTextField(emailController, "Email address",
+                      isEmail: true),
                   SizedBox(height: 15),
                   _buildTextField(passwordController, "Password",
                       isPassword: true),
@@ -177,9 +285,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       context,
                       MaterialPageRoute(builder: (context) => SignInScreen()),
                     ),
-                    child: Text(
-                      "Already have an account? Sign In",
-                      style: TextStyle(color: Colors.white70),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Already have an account? ",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          TextSpan(
+                            text: "Sign In",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -192,21 +310,84 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
-      {bool isPassword = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      style: TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.grey[900],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+      {bool isPassword = false, bool isMobile = false, bool isEmail = false}) {
+    String? errorText;
+    List<TextInputFormatter> inputFormatters = [];
+    TextInputType keyboardType = TextInputType.text;
+
+    if (isMobile) {
+      errorText = mobileError;
+      inputFormatters = [FilteringTextInputFormatter.digitsOnly];
+      keyboardType = TextInputType.phone;
+    } else if (isEmail) {
+      errorText = emailError;
+      keyboardType = TextInputType.emailAddress;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: controller,
+          obscureText: isPassword ? !isPasswordVisible : false,
+          style: TextStyle(color: Colors.white),
+          cursorColor: Colors.white70,
+          inputFormatters: inputFormatters,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: TextStyle(color: Colors.white70),
+            filled: true,
+            fillColor: Colors.grey[900],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.white70, width: 1.0),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.red, width: 1.0),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.red, width: 1.0),
+            ),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isPasswordVisible = !isPasswordVisible;
+                      });
+                    },
+                  )
+                : null,
+          ),
         ),
-      ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 5, left: 12),
+            child: Text(
+              errorText,
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
