@@ -94,6 +94,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/cklogo.png
     - assets/team.jpg
     - assets/book.jpg
     - assets/tr.jpg

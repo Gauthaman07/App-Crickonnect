@@ -274,13 +274,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header - Updated to be smaller and left-aligned
+        // Section Header - Center aligned
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: Text(
-              "Pending Requests",
+              "Requests for My Ground",
               style: TextStyle(
                 fontSize: 14, // Reduced from 18
                 fontWeight: FontWeight.w600,
@@ -299,13 +299,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header - Updated to be smaller and left-aligned
+        // Section Header - Center aligned
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: Text(
-              "Your Bookings",
+              "Grounds, I Booked",
               style: TextStyle(
                 fontSize: 14, // Already small, kept same
                 fontWeight: FontWeight.w600,
@@ -409,7 +409,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       Text(
                         _capitalize(teamName),
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -423,7 +423,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       Text(
                         "${date.toUpperCase()} | ${time.toUpperCase()}",
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -622,7 +622,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       Text(
                         _capitalize(groundName),
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -650,7 +650,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       Text(
                         "${date.toUpperCase()} | ${time.toUpperCase()}",
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),

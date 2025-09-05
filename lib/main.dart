@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'push/notification_service.dart';
 import './services/fcm_manager.dart';
 import './services/api_service.dart';
@@ -73,26 +74,8 @@ class InitialScreen extends StatelessWidget {
       future: ApiService.getMyTeam(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show loading screen while checking team
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: Colors.red),
-                  SizedBox(height: 20),
-                  Text(
-                    'Loading...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+          // Show splash screen with logo while checking team
+          return SplashScreen();
         }
 
         if (snapshot.hasError) {
@@ -200,6 +183,23 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar:
           BottomNavBar(currentIndex: _selectedIndex, onTap: _onItemTapped),
+    );
+  }
+}
+
+// Clean Splash Screen with Logo Only
+class SplashScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Image.asset(
+          'assets/cklogo.png',
+          width: 150,
+          height: 150,
+        ),
+      ),
     );
   }
 }

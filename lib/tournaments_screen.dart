@@ -986,41 +986,6 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
             const SizedBox(height: 12),
 
-            // Prize Pool Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.yellow[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.yellow[200]!),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Prize Pool: ',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    winningPrize,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
             // Team spots indicator
             Row(
               children: [
@@ -1181,29 +1146,92 @@ class _TournamentsScreenState extends State<TournamentsScreen>
 
             const SizedBox(height: 16),
 
-            // Join button
-            SizedBox(
+            // Prize Pool Section (moved above button)
+            Container(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _navigateToRegisterTournament(tournament),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.yellow[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.yellow[200]!),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Prize Pool: ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  elevation: 0,
+                  Text(
+                    winningPrize,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Join button or Full indicator
+            if (spotsLeft <= 0)
+              // Tournament Full indicator
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: const Text(
-                  'JOIN',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.group, color: Colors.grey.shade600, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      'TOURNAMENT FULL',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              // Join button (smaller)
+              SizedBox(
+                width: double.infinity,
+                height: 40, // Made smaller
+                child: ElevatedButton(
+                  onPressed: () => _navigateToRegisterTournament(tournament),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'JOIN TOURNAMENT',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
