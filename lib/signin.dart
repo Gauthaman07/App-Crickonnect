@@ -19,6 +19,7 @@ class _SignInScreenState extends State<SignInScreen> {
   bool isLoading = false;
   bool isButtonEnabled = false;
   bool isPasswordVisible = false;
+  String? validationMessage;
 
   @override
   void initState() {
@@ -38,12 +39,69 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() {
       isButtonEnabled = emailOrMobileController.text.isNotEmpty &&
           passwordController.text.isNotEmpty;
+
+      // Clear validation message when user starts typing
+      if (validationMessage != null) {
+        validationMessage = null;
+      }
     });
   }
 
+  void _showValidationMessage(String message) {
+    setState(() {
+      validationMessage = message;
+    });
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(email);
+  }
+
+  bool _isValidMobile(String mobile) {
+    return mobile.length >= 10 && RegExp(r'^[0-9]+$').hasMatch(mobile);
+  }
+
+  bool _validateInputs() {
+    final emailOrMobile = emailOrMobileController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (emailOrMobile.isEmpty) {
+      _showValidationMessage("Please enter your email or mobile number");
+      return false;
+    }
+
+    if (password.isEmpty) {
+      _showValidationMessage("Please enter your password");
+      return false;
+    }
+
+    if (password.length < 6) {
+      _showValidationMessage("Password must be at least 6 characters long");
+      return false;
+    }
+
+    // Check if input is email or mobile
+    bool isEmail = emailOrMobile.contains('@');
+    if (isEmail && !_isValidEmail(emailOrMobile)) {
+      _showValidationMessage("Please enter a valid email address");
+      return false;
+    } else if (!isEmail && !_isValidMobile(emailOrMobile)) {
+      _showValidationMessage("Please enter a valid mobile number (10+ digits)");
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> _signIn() async {
+    if (!_validateInputs()) {
+      return;
+    }
+
     setState(() {
       isLoading = true;
+      validationMessage = null; // Clear any existing validation message
     });
 
     try {
@@ -79,11 +137,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ],
             ),
-            backgroundColor: Colors.green[600],
+            backgroundColor: Colors.white70,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.black, width: 1)),
             margin: EdgeInsets.all(16),
             elevation: 6,
             duration: Duration(seconds: 3),
@@ -237,6 +295,38 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ],
             ),
+            // Validation Message
+            if (validationMessage != null)
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 32.0, vertical: 10.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.red.shade300, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        validationMessage!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Column(
@@ -284,7 +374,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.white70, width: 1.0),
+                        borderSide:
+                            BorderSide(color: Colors.white70, width: 1.0),
                       ),
                     ),
                     keyboardType: TextInputType.text,
@@ -310,11 +401,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.white70, width: 1.0),
+                        borderSide:
+                            BorderSide(color: Colors.white70, width: 1.0),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: Colors.white70,
                         ),
                         onPressed: () {

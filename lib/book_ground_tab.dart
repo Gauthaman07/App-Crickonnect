@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import './ground_details_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BookGroundTab extends StatefulWidget {
   const BookGroundTab({super.key});
@@ -166,58 +167,100 @@ class GroundCard extends StatelessWidget {
                 // Gap between image and content
                 SizedBox(height: 12),
                 // Content section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // Ground Name - Large, Bold, Roboto Condensed
+                    Text(
+                      ground['groundName'].toString().toUpperCase(),
+                      style: GoogleFonts.robotoCondensed(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
+                    // Team Name - Medium, with cricket icon
+                    Row(
                       children: [
-                        Text(
-                          ground['groundName'].toString()[0].toUpperCase() +
-                              ground['groundName'].toString().substring(1),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 4),
+                        // Icon(
+                        //   Icons.sports_cricket,
+                        //   size: 16,
+                        //   color: Colors.red,
+                        // ),
+                        // SizedBox(width: 6),
                         Text(
                           ground['ownedByTeam'] != null
-                              ? ground['ownedByTeam']['teamName'].toUpperCase()
-                              : 'NO TEAM',
-                          style: TextStyle(fontSize: 14, color: Colors.black),
+                              ? ground['ownedByTeam']['teamName']
+                                  .toString()
+                                  .split(' ')
+                                  .map((word) => word.isNotEmpty
+                                      ? word[0].toUpperCase() +
+                                          word.substring(1).toLowerCase()
+                                      : word)
+                                  .join(' ')
+                              : 'No Team',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
                         ),
-                        Text(
-                          ground['location'].toUpperCase(),
-                          style: TextStyle(fontSize: 14, color: Colors.black),
-                        ),
-
-                        // Text(
-                        //   "₹${ground['fee']}",
-                        //   style: TextStyle(
-                        //     fontSize: 14,
-                        //     color: Colors.black,
-                        //     decoration: TextDecoration.underline,
-                        //   ),
-                        // ),
                       ],
                     ),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 2, horizontal: 12),
-                      decoration: BoxDecoration(
-                        // color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        "₹${ground['fee']}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          decoration: TextDecoration.underline,
+                    SizedBox(height: 6),
+
+                    // Location and Price Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Location - Small, with location icon
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              ground['location']
+                                  .toString()
+                                  .split(' ')
+                                  .map((word) => word.isNotEmpty
+                                      ? word[0].toUpperCase() +
+                                          word.substring(1).toLowerCase()
+                                      : word)
+                                  .join(' '),
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+
+                        // Price - Right aligned, highlighted
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Text(
+                            "₹${ground['fee']}",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

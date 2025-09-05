@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 import 'booking_confirmation_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GroundDetailsPage extends StatefulWidget {
   final Map<String, dynamic> ground;
@@ -245,6 +246,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                     ),
                   ],
                 ),
+                // Ground name and location with padding
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -255,7 +257,7 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                             ? widget.ground["groundName"]
                                 .toUpperCase() // Changed to all caps
                             : "",
-                        style: TextStyle(
+                        style: GoogleFonts.robotoCondensed(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
@@ -267,80 +269,79 @@ class _GroundDetailsPageState extends State<GroundDetailsPage> {
                           style: const TextStyle(
                               fontSize: 16, color: Colors.black)),
                       const SizedBox(height: 20),
-
-                      // Team name in a box with shadow and logo on left
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            // Team Logo on the left
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(25),
-                              child: Image.network(
-                                widget.ground['ownedByTeam']?['teamLogo'] ?? "",
-                                height: 50,
-                                width: 50,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    child: Icon(
-                                      Icons.sports_cricket,
-                                      size: 25,
-                                      color: Colors.grey[600],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Team Name on the right
-                            Expanded(
-                              child: Text(
-                                widget.ground['ownedByTeam'] != null
-                                    ? widget.ground['ownedByTeam']['teamName']
-                                            .toString()
-                                            .isNotEmpty
-                                        ? widget.ground['ownedByTeam']
-                                                    ['teamName'][0]
-                                                .toUpperCase() +
-                                            widget.ground['ownedByTeam']
-                                                    ['teamName']
-                                                .substring(1)
-                                        : 'No Team'
-                                    : 'No Team',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
+
+                // Team name in a box with shadow and logo on left - NO side gaps
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      // Team Logo on the left
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(25),
+                        child: Image.network(
+                          widget.ground['ownedByTeam']?['teamLogo'] ?? "",
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Icon(
+                                Icons.sports_cricket,
+                                size: 25,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Team Name on the right
+                      Expanded(
+                        child: Text(
+                          widget.ground['ownedByTeam'] != null
+                              ? widget.ground['ownedByTeam']['teamName']
+                                      .toString()
+                                      .isNotEmpty
+                                  ? widget.ground['ownedByTeam']
+                                              ['teamName'][0]
+                                          .toUpperCase() +
+                                      widget.ground['ownedByTeam']
+                                              ['teamName']
+                                          .substring(1)
+                                  : 'No Team'
+                              : 'No Team',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 // Date Selector
                 buildDateSelector(),

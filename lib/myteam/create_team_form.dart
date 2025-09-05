@@ -565,15 +565,15 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       filled: true,
                       fillColor: Colors.transparent,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
@@ -593,15 +593,15 @@ class _CreateTeamFormState extends State<CreateTeamForm> {
                       filled: true,
                       fillColor: Colors.transparent,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide(color: Colors.black, width: 1),
                       ),
                     ),

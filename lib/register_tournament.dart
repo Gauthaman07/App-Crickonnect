@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '/services/api_service.dart';
 
 class RegisterTournamentScreen extends StatefulWidget {
@@ -23,8 +24,6 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
   String captainName = '';
   String contactInfo = '';
   String numberOfPlayers = '';
-  String preferredSlot = '';
-  bool rulesAgreement = false;
   bool isSubmitting = false;
 
   // Add variables for team selection
@@ -68,11 +67,9 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
   }
 
   void _submitForm() async {
-    if (!_formKey.currentState!.validate() || !rulesAgreement) {
+    if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text('Please fill all required fields and agree to the rules')),
+        const SnackBar(content: Text('Please fill all required fields')),
       );
       return;
     }
@@ -97,8 +94,6 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
         "captainName": captainName,
         "contactInfo": contactInfo,
         "numberOfPlayers": int.tryParse(numberOfPlayers) ?? 0,
-        "preferredSlot": preferredSlot,
-        "rulesAgreement": rulesAgreement,
       };
 
       final result = await _apiService.registerTournament(data);
@@ -121,20 +116,20 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: Colors.grey), // Default label color
-      floatingLabelStyle:
-          const TextStyle(color: Colors.red), // Color when focused
+      floatingLabelStyle: const TextStyle(
+          color: Colors.black), // Color when focused - changed to black
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Colors.transparent,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         borderSide: const BorderSide(color: Colors.grey, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         borderSide: const BorderSide(color: Colors.grey, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         borderSide: const BorderSide(color: Colors.grey, width: 1.5),
       ),
     );
@@ -149,12 +144,14 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
           style: TextStyle(
             fontFamily: 'Boldonse',
             fontSize: 16,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF15151E),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      backgroundColor: Colors.white, // Set the background color to white
+      backgroundColor:
+          const Color(0xFFF5F0ED), // Set the background color to beige
       body: isLoadingTeams
           ? const Center(child: CircularProgressIndicator(color: Colors.red))
           : Padding(
@@ -216,7 +213,8 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextFormField(
-                          decoration: _inputDecoration('Captain Name'),
+                          decoration: _inputDecoration('Captain name'),
+                          cursorColor: Colors.black,
                           validator: (value) => value == null || value.isEmpty
                               ? 'Required'
                               : null,
@@ -230,10 +228,22 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextFormField(
-                          decoration: _inputDecoration('Contact Info'),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Required'
-                              : null,
+                          decoration: _inputDecoration('Mobile number'),
+                          keyboardType: TextInputType.phone,
+                          cursorColor: Colors.black,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required';
+                            }
+                            if (value.length != 10) {
+                              return 'Contact info must be exactly 10 digits';
+                            }
+                            return null;
+                          },
                           onChanged: (value) => contactInfo = value,
                         ),
                       ),
@@ -244,37 +254,15 @@ class _RegisterTournamentScreenState extends State<RegisterTournamentScreen> {
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextFormField(
-                          decoration:
-                              _inputDecoration('Number of Players (optional)'),
+                          decoration: _inputDecoration('Number of players '),
                           keyboardType: TextInputType.number,
+                          cursorColor: Colors.black,
                           onChanged: (value) => numberOfPlayers = value,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    Center(
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: TextFormField(
-                          decoration:
-                              _inputDecoration('Preferred Slot (optional)'),
-                          onChanged: (value) => preferredSlot = value,
-                        ),
-                      ),
-                    ),
 
                     const SizedBox(height: 20),
-                    // Checkbox for rules agreement
-                    CheckboxListTile(
-                      title: const Text("I agree to the tournament rules"),
-                      value: rulesAgreement,
-                      onChanged: (value) {
-                        setState(() {
-                          rulesAgreement = value ?? false;
-                        });
-                      },
-                    ),
                     const SizedBox(height: 20),
                     // Submit Button
                     Center(
