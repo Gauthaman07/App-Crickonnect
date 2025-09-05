@@ -363,23 +363,23 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage>
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        "Ground Location",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.location_on,
+                  //       size: 16,
+                  //       color: Colors.grey.shade600,
+                  //     ),
+                  //     const SizedBox(width: 4),
+                  //     Text(
+                  //       "Ground Location",
+                  //       style: GoogleFonts.poppins(
+                  //         fontSize: 14,
+                  //         color: Colors.grey.shade600,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
