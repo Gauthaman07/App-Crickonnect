@@ -31,14 +31,14 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     try {
       // Check if user has ground by getting team info
       final teamResponse = await ApiService.getMyTeam();
-      
+
       if (teamResponse != null && teamResponse['team'] != null) {
         bool userHasGround = teamResponse['team']['hasOwnGround'] == true;
-        
+
         setState(() {
           hasGround = userHasGround;
         });
-        
+
         if (userHasGround) {
           // User has ground - fetch pending requests for ground owners
           await fetchPendingRequests();
@@ -72,7 +72,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
 
       if (response != null && response['success'] == true) {
         setState(() {
-          groupedRequests = List<Map<String, dynamic>>.from(response['requests'] ?? []);
+          groupedRequests =
+              List<Map<String, dynamic>>.from(response['requests'] ?? []);
           isLoading = false;
         });
       } else {
@@ -100,7 +101,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
 
       if (response != null && response['success'] == true) {
         setState(() {
-          userBookings = List<Map<String, dynamic>>.from(response['bookings'] ?? []);
+          userBookings =
+              List<Map<String, dynamic>>.from(response['bookings'] ?? []);
           isLoading = false;
         });
       } else {
@@ -117,7 +119,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     }
   }
 
-  Future<void> respondToRequest(List<String> requestIds, String status, String? responseNote) async {
+  Future<void> respondToRequest(
+      List<String> requestIds, String status, String? responseNote) async {
     try {
       final response = await ApiService.respondToGroundBookings(
         requestIds: requestIds,
@@ -128,13 +131,16 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       if (response != null && response['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message'] ?? 'Request(s) ${status} successfully'),
-            backgroundColor: status == 'approved' ? Colors.green : Colors.orange,
+            content: Text(
+                response['message'] ?? 'Request(s) ${status} successfully'),
+            backgroundColor:
+                status == 'approved' ? Colors.green : Colors.orange,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
-        
+
         // Refresh the appropriate data based on user type
         await checkUserGroundStatus();
       } else {
@@ -146,7 +152,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
           content: Text('Error responding to request: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     }
@@ -154,7 +161,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
 
   void showResponseDialog(Map<String, dynamic> request) {
     final TextEditingController noteController = TextEditingController();
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -222,9 +229,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: 20),
-                
+
                 // Match details card
                 Container(
                   width: double.infinity,
@@ -239,7 +246,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                          Icon(Icons.calendar_today,
+                              size: 16, color: Colors.grey.shade600),
                           SizedBox(width: 8),
                           Text(
                             '${request['date']} - ${request['timeSlot'].toString().toUpperCase()}',
@@ -253,7 +261,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+                          Icon(Icons.location_on,
+                              size: 16, color: Colors.grey.shade600),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -266,9 +275,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                     ],
                   ),
                 ),
-                
+
                 SizedBox(height: 16),
-                
+
                 // Response note field
                 TextField(
                   controller: noteController,
@@ -285,7 +294,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                      borderSide:
+                          BorderSide(color: Colors.blue.shade400, width: 2),
                     ),
                     filled: true,
                     fillColor: Colors.white,
@@ -293,9 +303,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                   maxLines: 3,
                   style: GoogleFonts.inter(fontSize: 14),
                 ),
-                
+
                 SizedBox(height: 24),
-                
+
                 // Action buttons
                 Row(
                   children: [
@@ -324,11 +334,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       child: OutlinedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          respondToRequest(
-                            request['requestIds'].cast<String>(),
-                            'rejected',
-                            noteController.text.trim()
-                          );
+                          respondToRequest(request['requestIds'].cast<String>(),
+                              'rejected', noteController.text.trim());
                         },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.red.shade300),
@@ -352,11 +359,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          respondToRequest(
-                            request['requestIds'].cast<String>(),
-                            'approved',
-                            noteController.text.trim()
-                          );
+                          respondToRequest(request['requestIds'].cast<String>(),
+                              'approved', noteController.text.trim());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade500,
@@ -544,33 +548,33 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     return RefreshIndicator(
       onRefresh: checkUserGroundStatus,
       color: Colors.blue.shade600,
-      child: hasGround 
-        ? ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: groupedRequests.length,
-            itemBuilder: (context, index) {
-              final request = groupedRequests[index];
-              
-              switch (request['type']) {
-                case 'challenge_match':
-                  return _buildChallengeCard(request);
-                case 'host_match_complete':
-                  return _buildCompleteHostCard(request);
-                case 'host_match_waiting':
-                  return _buildWaitingHostCard(request);
-                default:
-                  return _buildRegularCard(request);
-              }
-            },
-          )
-        : ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: userBookings.length,
-            itemBuilder: (context, index) {
-              final booking = userBookings[index];
-              return _buildUserBookingCard(booking);
-            },
-          ),
+      child: hasGround
+          ? ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: groupedRequests.length,
+              itemBuilder: (context, index) {
+                final request = groupedRequests[index];
+
+                switch (request['type']) {
+                  case 'challenge_match':
+                    return _buildChallengeCard(request);
+                  case 'host_match_complete':
+                    return _buildCompleteHostCard(request);
+                  case 'host_match_waiting':
+                    return _buildWaitingHostCard(request);
+                  default:
+                    return _buildRegularCard(request);
+                }
+              },
+            )
+          : ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: userBookings.length,
+              itemBuilder: (context, index) {
+                final booking = userBookings[index];
+                return _buildUserBookingCard(booking);
+              },
+            ),
     );
   }
 
@@ -763,13 +767,15 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: request['status'] == 'ready_for_approval' 
+                  color: request['status'] == 'ready_for_approval'
                       ? Colors.green.shade100
                       : Colors.orange.shade100,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  request['status'] == 'ready_for_approval' ? 'READY' : 'WAITING',
+                  request['status'] == 'ready_for_approval'
+                      ? 'READY'
+                      : 'WAITING',
                   style: GoogleFonts.inter(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -781,9 +787,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 20),
-          
+
           // Team vs Team vertical display
           Container(
             width: double.infinity,
@@ -826,9 +832,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               ],
             ),
           ),
-          
+
           SizedBox(height: 16),
-          
+
           // Match details
           Row(
             children: [
@@ -844,9 +850,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 8),
-          
+
           Row(
             children: [
               Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
@@ -862,20 +868,18 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               ),
             ],
           ),
-          
-          if (showApprovalButtons && request['status'] == 'ready_for_approval') ...[
+
+          if (showApprovalButtons &&
+              request['status'] == 'ready_for_approval') ...[
             SizedBox(height: 20),
-            
+
             // Action buttons
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => respondToRequest(
-                      request['requestIds'].cast<String>(),
-                      'rejected',
-                      null
-                    ),
+                        request['requestIds'].cast<String>(), 'rejected', null),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: Colors.red.shade300),
                       foregroundColor: Colors.red.shade600,
@@ -898,10 +902,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                   flex: 2,
                   child: ElevatedButton(
                     onPressed: () => respondToRequest(
-                      request['requestIds'].cast<String>(),
-                      'approved',
-                      null
-                    ),
+                        request['requestIds'].cast<String>(), 'approved', null),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -970,13 +971,14 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ground info with image
+            // Main content layout - image left, details right
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Ground image
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 80,
+                  height: 120,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey.shade200,
@@ -1015,23 +1017,53 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                         ),
                 ),
                 SizedBox(width: 16),
+
+                // All details on right side
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Ground name and team info
                       Text(
                         booking['groundName'] ?? 'Ground Name',
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Colors.black,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 2),
                       Text(
                         _getUserBookingTeamsText(booking),
                         style: GoogleFonts.inter(
                           fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      SizedBox(height: 12),
+
+                      // Date and time
+                      Text(
+                        '${_formatDate(booking['bookedDate'])} | ${_formatTimeSlot(booking['timeSlot'])}',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      SizedBox(height: 4),
+
+                      // Location
+                      Text(
+                        booking['groundLocation'] ?? 'Ground Location',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
                           color: Colors.grey.shade600,
                         ),
                       ),
@@ -1040,44 +1072,21 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                 ),
               ],
             ),
-            
-            SizedBox(height: 16),
-            
-            // Location
-            Text(
-              booking['groundLocation'] ?? 'Ground Location',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            
-            SizedBox(height: 8),
-            
-            // Date and time
-            Text(
-              '${_formatDate(booking['bookedDate'])} | ${_formatTimeSlot(booking['timeSlot'])}',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            
+
             SizedBox(height: 20),
-            
+
             // Thin divider line
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 0),
+            Transform.translate(
+              offset: Offset(-20, 0),
               child: Container(
                 height: 1,
-                width: double.infinity,
+                width: MediaQuery.of(context).size.width,
                 color: Colors.grey.shade300,
               ),
             ),
-            
+
             SizedBox(height: 16),
-            
+
             // Status section at bottom
             Row(
               children: [
@@ -1108,8 +1117,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                 ),
               ],
             ),
-            
-            if (booking['responseNote'] != null && booking['responseNote'].toString().isNotEmpty) ...[
+
+            if (booking['responseNote'] != null &&
+                booking['responseNote'].toString().isNotEmpty) ...[
               SizedBox(height: 16),
               Container(
                 width: double.infinity,
@@ -1152,9 +1162,24 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     if (dateString == null) return 'Date';
     try {
       final date = DateTime.parse(dateString);
-      final weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday % 7];
+      final weekday =
+          ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday % 7];
       final day = date.day.toString().padLeft(2, '0');
-      final month = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month];
+      final month = [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ][date.month];
       final year = date.year;
       return '$weekday, $day $month, $year';
     } catch (e) {
@@ -1181,16 +1206,15 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
   String _getUserBookingTeamsText(Map<String, dynamic> booking) {
     switch (booking['matchType']) {
       case 'owner_play':
-        return '${booking['teamName']} vs ${booking['groundOwner'] ?? 'Ground Owner'}';
+        return booking['groundOwner'] ?? 'Ground Owner';
       case 'host_only':
         if (booking['opponentTeam'] != null) {
-          return '${booking['teamName']} vs ${booking['opponentTeam']['name']}';
+          return booking['opponentTeam']['name'];
         } else {
-          return '${booking['teamName']} vs TBD';
+          return 'TBD';
         }
       default:
-        return '${booking['teamName']}';
+        return booking['teamName'];
     }
   }
-
 }
