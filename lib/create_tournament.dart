@@ -262,7 +262,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     _teamCompositionController = TextEditingController();
 
     // Initialize reusable UI elements
-    _borderRadius = BorderRadius.circular(8);
+    _borderRadius = BorderRadius.circular(4);
     _normalBorder = OutlineInputBorder(
       borderRadius: _borderRadius,
       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -424,13 +424,21 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     // Original Scaffold version for standalone use
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF15151E),
+        title: Text(
+          'Create Tournament',
+          style: TextStyle(
+            fontFamily: 'Boldonse',
+            fontSize: 15,
+            color: Colors.white,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F0ED),
       body: _buildFormContent(),
     );
   }
@@ -450,18 +458,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Remove the title when embedded
-                  if (!widget.isEmbedded) ...[
-                    const Text(
-                      'Create Tournament',
-                      style: TextStyle(
-                        fontFamily: 'Boldonse',
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                  // Heading removed as requested
                   _buildTextField(
                     controller: _tournamentNameController,
                     label: 'Tournament name',
@@ -621,7 +618,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     String? Function(String?)? validator,
   }) {
     final normalBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(4),
       borderSide: BorderSide(color: Colors.black, width: 1),
     );
 
@@ -633,8 +630,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         validator: validator,
         decoration: InputDecoration(
           labelText: label,
-          filled: true,
-          fillColor: Colors.white,
+          filled: false,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           border: normalBorder,
@@ -653,7 +649,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required void Function(String?) onChanged,
   }) {
     final normalBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(4),
       borderSide: const BorderSide(color: Colors.black, width: 1),
     );
 
@@ -670,8 +666,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          filled: true,
-          fillColor: Colors.white,
+          filled: false,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           border: normalBorder,
@@ -689,7 +684,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     required VoidCallback onTap,
   }) {
     final normalBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(4),
       borderSide: const BorderSide(color: Colors.black, width: 1),
     );
 
@@ -700,8 +695,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            filled: true,
-            fillColor: Colors.white,
+            filled: false,
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             border: normalBorder,

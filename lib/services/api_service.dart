@@ -338,6 +338,40 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getUserBookings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString("token");
+
+      if (token == null) {
+        return {"success": false, "message": "No token found"};
+      }
+
+      print("📢 Fetching user bookings"); // Debugging
+      print("🔑 Token: $token"); // Debugging
+
+      final response = await http.get(
+        Uri.parse("$baseUrl/ground-booking/my-bookings"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print("📤 Bookings Response status: ${response.statusCode}"); // Debugging
+      print("📤 Bookings Response body: ${response.body}"); // Debugging
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {"success": false, "message": response.body};
+      }
+    } catch (e) {
+      print("❌ Get Bookings API Error: $e"); // Debugging
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
+
   Future<bool> updateBookingStatus(String bookingId, String status) async {
     final String url = "$baseUrl/ground-booking/update-status/$bookingId";
 
@@ -561,6 +595,279 @@ class ApiService {
     } catch (e) {
       print('Error sending FCM token to backend: $e');
       return false;
+    }
+  }
+
+  // Weekly Availability API Methods
+  static Future<Map<String, dynamic>?> getWeeklyAvailability(DateTime weekStartDate) async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/weekly-availability/my-availability?weekStartDate=${weekStartDate.toIso8601String()}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> updateDayTimeSlot({
+    required DateTime weekStartDate,
+    required String day,
+    required String timeSlot,
+    required String mode,
+  }) async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/weekly-availability/update-slot'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'weekStartDate': weekStartDate.toIso8601String(),
+          'day': day,
+          'timeSlot': timeSlot,
+          'mode': mode,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> generateNextWeekAvailability() async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/weekly-availability/generate-next-week'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getAvailableGuestSlots({
+    required String groundId,
+    DateTime? weekStartDate,
+  }) async {
+    try {
+      String weekParam = weekStartDate != null 
+          ? '&weekStartDate=${weekStartDate.toIso8601String()}'
+          : '';
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/weekly-availability/guest-slots?groundId=$groundId$weekParam'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  // Guest Match Request API Methods
+  static Future<Map<String, dynamic>?> requestGuestMatch({
+    required String groundId,
+    required DateTime requestedDate,
+    required String timeSlot,
+    required String teamAId,
+    required String teamBId,
+    String? matchDescription,
+  }) async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/guest-matches/request'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'groundId': groundId,
+          'requestedDate': requestedDate.toIso8601String(),
+          'timeSlot': timeSlot,
+          'teamAId': teamAId,
+          'teamBId': teamBId,
+          'matchDescription': matchDescription,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> respondToGuestMatch({
+    required String requestId,
+    required String status,
+    String? responseNote,
+  }) async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/guest-matches/respond/$requestId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'status': status,
+          'responseNote': responseNote,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getPendingGuestRequests() async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/guest-matches/pending'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getPendingGroundRequests() async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/ground-booking/pending-requests'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>?> respondToGroundBookings({
+    required List<String> requestIds,
+    required String status,
+    String? responseNote,
+  }) async {
+    try {
+      String? token = await AuthService.getAuthToken();
+      if (token == null) return null;
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/ground-booking/respond-to-requests'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'requestIds': requestIds,
+          'status': status,
+          'responseNote': responseNote,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print('API Exception: $e');
+      return {'success': false, 'message': 'Error: $e'};
     }
   }
 }

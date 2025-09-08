@@ -125,12 +125,12 @@ class _SignInScreenState extends State<SignInScreen> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                Icon(Icons.check_circle, color: Colors.black, size: 20),
                 SizedBox(width: 12),
                 Text(
                   'Login Successful!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),

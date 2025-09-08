@@ -2,62 +2,23 @@ import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class GroundRequestTab extends StatefulWidget {
-  const GroundRequestTab({super.key});
+class EnhancedGroundRequestsScreen extends StatefulWidget {
+  const EnhancedGroundRequestsScreen({super.key});
 
   @override
-  _GroundRequestTabState createState() => _GroundRequestTabState();
+  _EnhancedGroundRequestsScreenState createState() =>
+      _EnhancedGroundRequestsScreenState();
 }
 
-class _GroundRequestTabState extends State<GroundRequestTab> {
+class _EnhancedGroundRequestsScreenState extends State<EnhancedGroundRequestsScreen> {
   List<Map<String, dynamic>> groupedRequests = [];
-  List<Map<String, dynamic>> userBookings = [];
   bool isLoading = true;
   String? error;
-  bool hasGround = false;
 
   @override
   void initState() {
     super.initState();
-    checkUserGroundStatus();
-  }
-
-  Future<void> checkUserGroundStatus() async {
-    setState(() {
-      isLoading = true;
-      error = null;
-    });
-
-    try {
-      // Check if user has ground by getting team info
-      final teamResponse = await ApiService.getMyTeam();
-      
-      if (teamResponse != null && teamResponse['team'] != null) {
-        bool userHasGround = teamResponse['team']['hasOwnGround'] == true;
-        
-        setState(() {
-          hasGround = userHasGround;
-        });
-        
-        if (userHasGround) {
-          // User has ground - fetch pending requests for ground owners
-          await fetchPendingRequests();
-        } else {
-          // User doesn't have ground - fetch their booking requests
-          await fetchUserBookings();
-        }
-      } else {
-        setState(() {
-          error = 'Failed to get team information';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        error = 'Error: $e';
-        isLoading = false;
-      });
-    }
+    fetchPendingRequests();
   }
 
   Future<void> fetchPendingRequests() async {
@@ -67,7 +28,6 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     });
 
     try {
-      // Fetch the new grouped ground requests
       final response = await ApiService.getPendingGroundRequests();
 
       if (response != null && response['success'] == true) {
@@ -78,34 +38,6 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       } else {
         setState(() {
           error = response?['message'] ?? 'Failed to fetch requests';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        error = 'Error: $e';
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> fetchUserBookings() async {
-    setState(() {
-      isLoading = true;
-      error = null;
-    });
-
-    try {
-      final response = await ApiService.getUserBookings();
-
-      if (response != null && response['success'] == true) {
-        setState(() {
-          userBookings = List<Map<String, dynamic>>.from(response['bookings'] ?? []);
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          error = response?['message'] ?? 'Failed to fetch your bookings';
           isLoading = false;
         });
       }
@@ -135,8 +67,8 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
           ),
         );
         
-        // Refresh the appropriate data based on user type
-        await checkUserGroundStatus();
+        // Refresh the requests list
+        await fetchPendingRequests();
       } else {
         throw Exception(response?['message'] ?? 'Response failed');
       }
@@ -399,231 +331,181 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     }
   }
 
-  String _getTeamVsText(Map<String, dynamic> request) {
-    switch (request['type']) {
-      case 'challenge_match':
-        return '${request['teamA']['name']} vs Your Team';
-      case 'host_match_complete':
-        return '${request['teamA']['name']} vs ${request['teamB']['name']}';
-      case 'host_match_waiting':
-        return '${request['teamA']['name']} vs TBD';
-      default:
-        return request['teamA']['name'];
-    }
-  }
-
-  String _getTeamAName(Map<String, dynamic> request) {
-    return request['teamA']['name'] ?? 'Team A';
-  }
-
-  String _getTeamBName(Map<String, dynamic> request) {
-    switch (request['type']) {
-      case 'challenge_match':
-        return request['groundOwnerTeam']?['name'] ?? 'Your Team';
-      case 'host_match_complete':
-        return request['teamB']?['name'] ?? 'Team B';
-      case 'host_match_waiting':
-        return 'TBD';
-      default:
-        return 'Team B';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: Colors.blue.shade600),
-      );
-    }
-
-    if (error != null) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red.shade400,
-              ),
-              SizedBox(height: 16),
-              Text(
-                error!,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.red.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: checkUserGroundStatus,
-                child: Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade600,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: Text(
+          'Ground Requests',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.blue.shade600,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: fetchPendingRequests,
+            icon: Icon(Icons.refresh),
+            tooltip: 'Refresh',
+          ),
+        ],
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator(color: Colors.blue.shade600))
+          : error != null
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade400,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          error!,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: Colors.red.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: fetchPendingRequests,
+                          child: Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade600,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (hasGround && groupedRequests.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'No Pending Requests',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Ground booking requests will appear here',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (!hasGround && userBookings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sports_cricket,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'No Match Requests',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Your match requests will appear here',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: checkUserGroundStatus,
-      color: Colors.blue.shade600,
-      child: hasGround 
-        ? ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: groupedRequests.length,
-            itemBuilder: (context, index) {
-              final request = groupedRequests[index];
-              
-              switch (request['type']) {
-                case 'challenge_match':
-                  return _buildChallengeCard(request);
-                case 'host_match_complete':
-                  return _buildCompleteHostCard(request);
-                case 'host_match_waiting':
-                  return _buildWaitingHostCard(request);
-                default:
-                  return _buildRegularCard(request);
-              }
-            },
-          )
-        : ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: userBookings.length,
-            itemBuilder: (context, index) {
-              final booking = userBookings[index];
-              return _buildUserBookingCard(booking);
-            },
-          ),
+                )
+              : groupedRequests.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inbox_outlined,
+                            size: 80,
+                            color: Colors.grey.shade400,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No Pending Requests',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Ground booking requests will appear here',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: fetchPendingRequests,
+                      color: Colors.blue.shade600,
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(16),
+                        itemCount: groupedRequests.length,
+                        itemBuilder: (context, index) {
+                          final request = groupedRequests[index];
+                          
+                          switch (request['type']) {
+                            case 'challenge_match':
+                              return _buildChallengeCard(request);
+                            case 'host_match_complete':
+                              return _buildCompleteHostCard(request);
+                            case 'host_match_waiting':
+                              return _buildWaitingHostCard(request);
+                            default:
+                              return _buildRegularCard(request);
+                          }
+                        },
+                      ),
+                    ),
     );
   }
 
-  // Challenge Match Card - Dark theme to match app header
+  // Challenge Match Card - Purple theme
   Widget _buildChallengeCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Color(0xFF15151E),
-          width: 1.5,
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple.shade50,
+            Colors.purple.shade100.withOpacity(0.3),
+          ],
         ),
+        border: Border.all(color: Colors.purple.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
+            color: Colors.purple.shade100.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: _buildCardContent(
         request: request,
         icon: Icons.sports_kabaddi,
-        iconColor: Color(0xFF15151E),
-        iconBgColor: Color(0xFFF5F0ED),
+        iconColor: Colors.purple.shade600,
+        iconBgColor: Colors.purple.shade100,
         title: 'Challenge Request',
         subtitle: 'They want to challenge your team!',
-        titleColor: Color(0xFF15151E),
-        accentColor: Color(0xFF15151E),
+        titleColor: Colors.purple.shade700,
+        accentColor: Colors.purple.shade600,
       ),
     );
   }
 
-  // Complete Host Match Card - Blue accent (matching ground availability banner)
+  // Complete Host Match Card - Blue theme
   Widget _buildCompleteHostCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.blue.shade600,
-          width: 1.5,
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade50,
+            Colors.blue.shade100.withOpacity(0.3),
+          ],
         ),
+        border: Border.all(color: Colors.blue.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
+            color: Colors.blue.shade100.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -631,7 +513,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         request: request,
         icon: Icons.sports_cricket,
         iconColor: Colors.blue.shade600,
-        iconBgColor: Colors.blue.shade50,
+        iconBgColor: Colors.blue.shade100,
         title: 'Host Match Request',
         subtitle: 'Two teams ready to play at your ground',
         titleColor: Colors.blue.shade700,
@@ -640,57 +522,63 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // Waiting Host Match Card - Gray theme for waiting state
+  // Waiting Host Match Card - Orange theme
   Widget _buildWaitingHostCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.shade400,
-          width: 1.5,
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.orange.shade50,
+            Colors.orange.shade100.withOpacity(0.3),
+          ],
         ),
+        border: Border.all(color: Colors.orange.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
+            color: Colors.orange.shade100.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: _buildCardContent(
         request: request,
         icon: Icons.hourglass_empty,
-        iconColor: Colors.grey.shade600,
-        iconBgColor: Colors.grey.shade100,
+        iconColor: Colors.orange.shade600,
+        iconBgColor: Colors.orange.shade100,
         title: 'Looking for Opponent',
         subtitle: 'Waiting for another team to join',
-        titleColor: Colors.grey.shade700,
-        accentColor: Colors.grey.shade600,
+        titleColor: Colors.orange.shade700,
+        accentColor: Colors.orange.shade600,
         showApprovalButtons: false,
       ),
     );
   }
 
-  // Regular Booking Card - Green accent (matching ground availability banner)
+  // Regular Booking Card - Green theme
   Widget _buildRegularCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.green.shade600,
-          width: 1.5,
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green.shade50,
+            Colors.green.shade100.withOpacity(0.3),
+          ],
         ),
+        border: Border.all(color: Colors.green.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
+            color: Colors.green.shade100.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -698,7 +586,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         request: request,
         icon: Icons.sports_cricket,
         iconColor: Colors.green.shade600,
-        iconBgColor: Colors.green.shade50,
+        iconBgColor: Colors.green.shade100,
         title: 'Ground Booking',
         subtitle: 'Regular ground rental request',
         titleColor: Colors.green.shade700,
@@ -784,44 +672,44 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
           
           SizedBox(height: 20),
           
-          // Team vs Team vertical display
+          // Match/Teams Display
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: Colors.white.withOpacity(0.7),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: Colors.white.withOpacity(0.5)),
             ),
             child: Column(
               children: [
-                Text(
-                  _getTeamAName(request),
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'vs',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  _getTeamBName(request),
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
+                // Team vs Team display
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildTeamDisplay(request['teamA'], accentColor),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: accentColor.withOpacity(0.3)),
+                      ),
+                      child: Text(
+                        'VS',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                    _buildTeamDisplay(
+                      request['teamB'] ?? {'name': 'TBD', 'logo': null}, 
+                      accentColor,
+                      isPlaceholder: request['teamB'] == null,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -885,7 +773,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       ),
                     ),
                     child: Text(
-                      'Reject',
+                      'Quick Reject',
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -897,11 +785,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: () => respondToRequest(
-                      request['requestIds'].cast<String>(),
-                      'approved',
-                      null
-                    ),
+                    onPressed: () => showResponseDialog(request),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -912,7 +796,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                       ),
                     ),
                     child: Text(
-                      'Accept',
+                      'Review & Respond',
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -928,269 +812,59 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // User Booking Card - Shows status of user's own requests
-  Widget _buildUserBookingCard(Map<String, dynamic> booking) {
-    Color statusColor;
-    String statusText;
-    String statusMessage;
-
-    switch (booking['status']?.toLowerCase()) {
-      case 'approved':
-        statusColor = Colors.green.shade600;
-        statusText = 'ACCEPTED';
-        statusMessage = 'Get Ready! Match is on';
-        break;
-      case 'rejected':
-        statusColor = Colors.red.shade600;
-        statusText = 'REJECTED';
-        statusMessage = 'Sorry, request was declined';
-        break;
-      default:
-        statusColor = Colors.orange.shade600;
-        statusText = 'PENDING';
-        statusMessage = 'Waiting for ground owner approval';
-    }
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
+  Widget _buildTeamDisplay(Map<String, dynamic> team, Color accentColor, {bool isPlaceholder = false}) {
+    return Column(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: isPlaceholder ? Colors.grey.shade200 : accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isPlaceholder ? Colors.grey.shade300 : accentColor.withOpacity(0.3),
+              width: 2,
+            ),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ground info with image
-            Row(
-              children: [
-                // Ground image
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey.shade200,
+          child: team['logo'] != null && !isPlaceholder
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.network(
+                    team['logo'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return _buildTeamInitial(team['name'], accentColor, isPlaceholder);
+                    },
                   ),
-                  child: booking['groundImage'] != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            booking['groundImage'],
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.sports_cricket,
-                                  color: Colors.grey.shade600,
-                                  size: 30,
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.sports_cricket,
-                            color: Colors.grey.shade600,
-                            size: 30,
-                          ),
-                        ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        booking['groundName'] ?? 'Ground Name',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        _getUserBookingTeamsText(booking),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 16),
-            
-            // Location
-            Text(
-              booking['groundLocation'] ?? 'Ground Location',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            
-            SizedBox(height: 8),
-            
-            // Date and time
-            Text(
-              '${_formatDate(booking['bookedDate'])} | ${_formatTimeSlot(booking['timeSlot'])}',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            
-            SizedBox(height: 20),
-            
-            // Thin divider line
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 0),
-              child: Container(
-                height: 1,
-                width: double.infinity,
-                color: Colors.grey.shade300,
-              ),
-            ),
-            
-            SizedBox(height: 16),
-            
-            // Status section at bottom
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    statusMessage,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
-            if (booking['responseNote'] != null && booking['responseNote'].toString().isNotEmpty) ...[
-              SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ground Owner Note:',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade700,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      booking['responseNote'],
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.blue.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
+                )
+              : _buildTeamInitial(team['name'], accentColor, isPlaceholder),
+        ),
+        SizedBox(height: 8),
+        Text(
+          team['name'].toString(),
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isPlaceholder ? Colors.grey.shade500 : Colors.grey.shade700,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamInitial(String teamName, Color accentColor, bool isPlaceholder) {
+    return Center(
+      child: Text(
+        isPlaceholder ? '?' : teamName.isNotEmpty ? teamName[0].toUpperCase() : '?',
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.bold,
+          fontSize: 24,
+          color: isPlaceholder ? Colors.grey.shade400 : accentColor,
         ),
       ),
     );
   }
-
-  String _formatDate(String? dateString) {
-    if (dateString == null) return 'Date';
-    try {
-      final date = DateTime.parse(dateString);
-      final weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday % 7];
-      final day = date.day.toString().padLeft(2, '0');
-      final month = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month];
-      final year = date.year;
-      return '$weekday, $day $month, $year';
-    } catch (e) {
-      return dateString;
-    }
-  }
-
-  String _formatTimeSlot(String? timeSlot) {
-    if (timeSlot == null) return 'TIME';
-    return timeSlot.toUpperCase();
-  }
-
-  String _getUserBookingSubtitle(Map<String, dynamic> booking) {
-    switch (booking['availabilityMode']) {
-      case 'owner_play':
-        return 'Challenge match request';
-      case 'host_only':
-        return 'Host match request';
-      default:
-        return 'Ground booking request';
-    }
-  }
-
-  String _getUserBookingTeamsText(Map<String, dynamic> booking) {
-    switch (booking['matchType']) {
-      case 'owner_play':
-        return '${booking['teamName']} vs ${booking['groundOwner'] ?? 'Ground Owner'}';
-      case 'host_only':
-        if (booking['opponentTeam'] != null) {
-          return '${booking['teamName']} vs ${booking['opponentTeam']['name']}';
-        } else {
-          return '${booking['teamName']} vs TBD';
-        }
-      default:
-        return '${booking['teamName']}';
-    }
-  }
-
 }

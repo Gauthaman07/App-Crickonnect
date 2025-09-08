@@ -3,7 +3,12 @@ import 'card_widget.dart';
 import './myteam/my_team_page.dart';
 import '../services/api_service.dart';
 import 'booking_screen.dart';
+import 'create_tournament.dart';
+import 'tournaments_screen.dart';
+import 'ground_availability_screen.dart';
+import 'guest_match_requests_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateToTab;
@@ -131,6 +136,93 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
 
+                // Ground Availability Hero Banner (only for ground owners)
+                if (teamData != null && teamData!['team']['hasOwnGround'] == true) ...[
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Material(
+                      elevation: 8,
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GroundAvailabilityScreen(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.green.shade600, Colors.blue.shade600],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.calendar_month,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Ground Availability',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Manage your weekly schedule & guest requests',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        color: Colors.white.withOpacity(0.9),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
+
                 // Cards Section with normal padding
                 Expanded(
                   child: SingleChildScrollView(
@@ -139,32 +231,41 @@ class _HomeScreenState extends State<HomeScreen> {
                           horizontal: 16.0), // Only for cards
                       child: Column(
                         children: [
-                          // 4 Cards in Vertical Layout with Enhanced Navigation
-                          CardWidget(
-                            title: "Manage Requests",
-                            description: "Handle ground booking requests",
-                            imagePath: "assets/team.jpg",
-                            onTap: () {
-                              widget.onNavigateToBookingTab(1);
-                            },
-                          ),
-                          SizedBox(height: 12),
-
                           CardWidget(
                             title: "Book Matches",
                             description: "Book grounds for your matches",
                             imagePath: "assets/book.jpg",
                             onTap: () {
+                              // Navigate to booking tab (Book Ground tab)
                               widget.onNavigateToBookingTab(0);
                             },
                           ),
+                          SizedBox(height: 12),
+                          // Enhanced Manage Requests Card for Ground Owners
+                          CardWidget(
+                            title: teamData != null && teamData!['team']['hasOwnGround'] == true
+                                ? "Manage All Requests"
+                                : "Manage Requests",
+                            description: teamData != null && teamData!['team']['hasOwnGround'] == true
+                                ? "Handle booking & guest match requests"
+                                : "Handle ground booking requests",
+                            imagePath: "assets/team.jpg",
+                            onTap: () {
+                              // Navigate to booking tab (Ground Requests tab)
+                              widget.onNavigateToBookingTab(1);
+                            },
+                          ),
+
                           SizedBox(height: 12),
 
                           CardWidget(
                             title: "Tournaments",
                             description: "View and join tournaments",
                             imagePath: "assets/tr.jpg",
-                            onTap: () => widget.onNavigateToTab(2),
+                            onTap: () {
+                              // Navigate to tournaments tab
+                              widget.onNavigateToTab(2);
+                            },
                           ),
                           SizedBox(height: 12),
 
@@ -172,16 +273,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             title: "Create Tournament",
                             description: "Start your own tournament",
                             imagePath: "assets/book.jpg",
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('Create Tournament - Coming Soon!'),
-                                  backgroundColor: Colors.orange,
+                            onTap: () async {
+                              // Navigate to create tournament screen
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CreateTournamentScreen(),
                                 ),
                               );
+                              // Optional: Handle result if tournament was created
+                              if (result == true) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Tournament created successfully!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
                             },
                           ),
+                          
+                          
                           SizedBox(height: 16), // Bottom spacing
                         ],
                       ),

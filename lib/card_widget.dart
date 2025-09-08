@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CardWidget extends StatelessWidget {
   final String title;
@@ -86,7 +87,7 @@ class CardWidget extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
@@ -97,10 +98,11 @@ class CardWidget extends StatelessWidget {
                     SizedBox(height: 8),
                     Text(
                       description,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Colors.grey.shade600,
                         height: 1.4,
+                        fontWeight: FontWeight.w400,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

@@ -46,7 +46,7 @@ class BottomNavBar extends StatelessWidget {
                     _buildAnimatedNavItem(Icons.emoji_events_outlined,
                         Icons.emoji_events, "Tournaments", 2),
                     _buildAnimatedNavItem(
-                        Icons.person_outline, Icons.person, "Profile", 3),
+                        Icons.person_outline, Icons.person, "Account", 3),
                   ],
                 ),
               ),
