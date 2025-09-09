@@ -11,6 +11,7 @@ class GroundRequestTab extends StatefulWidget {
 
 class _GroundRequestTabState extends State<GroundRequestTab> {
   List<Map<String, dynamic>> groupedRequests = [];
+  List<Map<String, dynamic>> confirmedMatches = [];
   List<Map<String, dynamic>> userBookings = [];
   bool isLoading = true;
   String? error;
@@ -73,7 +74,9 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       if (response != null && response['success'] == true) {
         setState(() {
           groupedRequests =
-              List<Map<String, dynamic>>.from(response['requests'] ?? []);
+              List<Map<String, dynamic>>.from(response['pendingRequests'] ?? []);
+          confirmedMatches =
+              List<Map<String, dynamic>>.from(response['confirmedMatches'] ?? []);
           isLoading = false;
         });
       } else {
@@ -134,7 +137,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
             content: Text(
                 response['message'] ?? 'Request(s) ${status} successfully'),
             backgroundColor:
-                status == 'approved' ? Colors.green : Colors.orange,
+                status == 'booked' ? Colors.green : Colors.orange,
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -360,7 +363,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                         onPressed: () {
                           Navigator.of(context).pop();
                           respondToRequest(request['requestIds'].cast<String>(),
-                              'approved', noteController.text.trim());
+                              'booked', noteController.text.trim());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade500,
@@ -481,7 +484,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       );
     }
 
-    if (hasGround && groupedRequests.isEmpty) {
+    if (hasGround && groupedRequests.isEmpty && confirmedMatches.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -549,23 +552,48 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       onRefresh: checkUserGroundStatus,
       color: Colors.blue.shade600,
       child: hasGround
-          ? ListView.builder(
+          ? SingleChildScrollView(
               padding: EdgeInsets.all(16),
-              itemCount: groupedRequests.length,
-              itemBuilder: (context, index) {
-                final request = groupedRequests[index];
-
-                switch (request['type']) {
-                  case 'challenge_match':
-                    return _buildChallengeCard(request);
-                  case 'host_match_complete':
-                    return _buildCompleteHostCard(request);
-                  case 'host_match_waiting':
-                    return _buildWaitingHostCard(request);
-                  default:
-                    return _buildRegularCard(request);
-                }
-              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Pending Requests Section
+                  if (groupedRequests.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      'Pending Requests', 
+                      groupedRequests.length,
+                      Colors.orange.shade600,
+                      Icons.pending_actions,
+                    ),
+                    SizedBox(height: 12),
+                    ...groupedRequests.map((request) {
+                      switch (request['type']) {
+                        case 'challenge_match':
+                          return _buildChallengeCard(request);
+                        case 'host_match_complete':
+                          return _buildCompleteHostCard(request);
+                        case 'host_match_waiting':
+                          return _buildWaitingHostCard(request);
+                        default:
+                          return _buildRegularCard(request);
+                      }
+                    }).toList(),
+                    SizedBox(height: 24),
+                  ],
+                  
+                  // Confirmed Matches Section
+                  if (confirmedMatches.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      'Confirmed Matches', 
+                      confirmedMatches.length,
+                      Colors.green.shade600,
+                      Icons.check_circle,
+                    ),
+                    SizedBox(height: 12),
+                    ...confirmedMatches.map((match) => _buildConfirmedMatchCard(match)).toList(),
+                  ],
+                ],
+              ),
             )
           : ListView.builder(
               padding: EdgeInsets.all(16),
@@ -578,17 +606,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // Challenge Match Card - Dark theme to match app header
+  // Challenge Match Card - Clean white card
   Widget _buildChallengeCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Color(0xFF15151E),
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -611,17 +635,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // Complete Host Match Card - Blue accent (matching ground availability banner)
+  // Complete Host Match Card - Clean white card
   Widget _buildCompleteHostCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.blue.shade600,
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -644,17 +664,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // Waiting Host Match Card - Gray theme for waiting state
+  // Waiting Host Match Card - Clean white card
   Widget _buildWaitingHostCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.shade400,
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -678,17 +694,13 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     );
   }
 
-  // Regular Booking Card - Green accent (matching ground availability banner)
+  // Regular Booking Card - Clean white card
   Widget _buildRegularCard(Map<String, dynamic> request) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.green.shade600,
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -902,7 +914,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
                   flex: 2,
                   child: ElevatedButton(
                     onPressed: () => respondToRequest(
-                        request['requestIds'].cast<String>(), 'approved', null),
+                        request['requestIds'].cast<String>(), 'booked', null),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -936,7 +948,7 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
     String statusMessage;
 
     switch (booking['status']?.toLowerCase()) {
-      case 'approved':
+      case 'booked':
         statusColor = Colors.green.shade600;
         statusText = 'ACCEPTED';
         statusMessage = 'Get Ready! Match is on';
@@ -1215,6 +1227,211 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         }
       default:
         return booking['teamName'];
+    }
+  }
+
+  // Section Header Widget
+  Widget _buildSectionHeader(String title, int count, Color color, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                '$count ${count == 1 ? 'item' : 'items'}',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Confirmed Match Card Widget
+  Widget _buildConfirmedMatchCard(Map<String, dynamic> match) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Match Type and Status
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _getMatchTypeText(match['type']),
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'CONFIRMED',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 12),
+          
+          // Teams
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _getConfirmedTeamAName(match),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              Text(
+                'vs',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  _getConfirmedTeamBName(match),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 8),
+          
+          // Ground and Location
+          Text(
+            '${match['groundName']} • ${match['groundLocation']}',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          
+          SizedBox(height: 8),
+          
+          // Date and Time
+          Text(
+            '${match['date']} • ${match['timeSlot'].toUpperCase()}',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getMatchTypeText(String type) {
+    switch (type) {
+      case 'challenge_match':
+        return 'CHALLENGE';
+      case 'host_match':
+      case 'host_match_single':
+        return 'HOSTING';
+      default:
+        return 'BOOKING';
+    }
+  }
+
+  String _getConfirmedTeamAName(Map<String, dynamic> match) {
+    switch (match['type']) {
+      case 'challenge_match':
+        // For challenge matches: Guest team vs Your team
+        return match['teamB']?['name'] ?? 'Guest Team';
+      case 'host_match':
+      case 'host_match_single':
+        // For host matches: Team A vs Team B (you're just hosting)
+        return match['teamA']?['name'] ?? 'Team A';
+      default:
+        // For regular bookings: Just the booking team
+        return match['teamA']?['name'] ?? 'Team';
+    }
+  }
+
+  String _getConfirmedTeamBName(Map<String, dynamic> match) {
+    switch (match['type']) {
+      case 'challenge_match':
+        // For challenge matches: Guest team vs Your team
+        return match['teamA']?['name'] ?? 'Your Team';
+      case 'host_match':
+        // For host matches: Team A vs Team B (you're just hosting)
+        return match['teamB']?['name'] ?? 'Team B';
+      case 'host_match_single':
+        // For single host matches: Team A vs TBD
+        return 'TBD';
+      default:
+        // For regular bookings: No opponent
+        return 'Ground Booking';
     }
   }
 }
