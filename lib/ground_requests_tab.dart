@@ -1290,37 +1290,22 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Match Type and Status
+          // Match Type Badge (top left only)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(6),
+                  color: _getMatchTypeColor(match['type'])['background'],
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   _getMatchTypeText(match['type']),
                   style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'CONFIRMED',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w600,
+                    color: _getMatchTypeColor(match['type'])['text'],
                   ),
                 ),
               ),
@@ -1386,6 +1371,47 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
               color: Colors.black,
             ),
           ),
+          
+          SizedBox(height: 12),
+          
+          // Divider
+          Container(
+            height: 0.5,
+            width: double.infinity,
+            color: Colors.grey.shade300,
+          ),
+          
+          SizedBox(height: 12),
+          
+          // CONFIRMED Badge with text
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'CONFIRMED',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Get Ready! Match is scheduled',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1400,6 +1426,27 @@ class _GroundRequestTabState extends State<GroundRequestTab> {
         return 'HOSTING';
       default:
         return 'BOOKING';
+    }
+  }
+
+  Map<String, Color> _getMatchTypeColor(String type) {
+    switch (type) {
+      case 'challenge_match':
+        return {
+          'background': Colors.orange.shade100,
+          'text': Colors.orange.shade700,
+        };
+      case 'host_match':
+      case 'host_match_single':
+        return {
+          'background': Colors.blue.shade100,
+          'text': Colors.blue.shade700,
+        };
+      default:
+        return {
+          'background': Colors.purple.shade100,
+          'text': Colors.purple.shade700,
+        };
     }
   }
 
