@@ -11,6 +11,84 @@ import 'package:mime/mime.dart';
 class ApiService {
   static const String baseUrl = "https://crikonnect-api.onrender.com/api";
 
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/auth/forgot-password"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {"success": true, "message": responseData['message']};
+      } else {
+        return {
+          "success": false,
+          "message": jsonDecode(response.body)["message"] ?? "Failed to send reset code"
+        };
+      }
+    } catch (e) {
+      return {
+        "success": false,
+        "message": "Network error: ${e.toString()}",
+        "errorType": e.runtimeType.toString()
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> verifyOTP(String email, String otp) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/auth/verify-otp"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "otp": otp}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {"success": true, "message": responseData['message']};
+      } else {
+        return {
+          "success": false,
+          "message": jsonDecode(response.body)["message"] ?? "Invalid OTP"
+        };
+      }
+    } catch (e) {
+      return {
+        "success": false,
+        "message": "Network error: ${e.toString()}",
+        "errorType": e.runtimeType.toString()
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/auth/reset-password"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "otp": otp, "newPassword": newPassword}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {"success": true, "message": responseData['message']};
+      } else {
+        return {
+          "success": false,
+          "message": jsonDecode(response.body)["message"] ?? "Failed to reset password"
+        };
+      }
+    } catch (e) {
+      return {
+        "success": false,
+        "message": "Network error: ${e.toString()}",
+        "errorType": e.runtimeType.toString()
+      };
+    }
+  }
+
   static Future<Map<String, dynamic>> signIn(
       String emailOrMobile, String password) async {
     try {

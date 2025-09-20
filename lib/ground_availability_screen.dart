@@ -439,18 +439,19 @@ class _GroundAvailabilityScreenState extends State<GroundAvailabilityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F0ED),
       appBar: AppBar(
         title: Text(
           'Ground Availability',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 18,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF15151E),
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -496,34 +497,63 @@ class _GroundAvailabilityScreenState extends State<GroundAvailabilityScreen> {
                         Container(
                           width: double.infinity,
                           margin: EdgeInsets.all(16),
-                          padding: EdgeInsets.all(16),
+                          padding: EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.green.shade400, Colors.blue.shade400],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Text(
-                                groundInfo!['groundName'] ?? 'Your Ground',
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.green.shade400, Colors.blue.shade500],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.sports_cricket,
                                   color: Colors.white,
+                                  size: 28,
                                 ),
                               ),
-                              if (groundInfo!['location'] != null)
-                                Text(
-                                  groundInfo!['location'],
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.9),
-                                  ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      groundInfo!['groundName'] ?? 'Your Ground',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    if (groundInfo!['location'] != null) ...[
+                                      SizedBox(height: 4),
+                                      Text(
+                                        groundInfo!['location'],
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
+                              ),
                             ],
                           ),
                         ),
@@ -558,11 +588,18 @@ class _GroundAvailabilityScreenState extends State<GroundAvailabilityScreen> {
                       // Legend
                       Container(
                         margin: EdgeInsets.all(16),
-                        padding: EdgeInsets.all(16),
+                        padding: EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

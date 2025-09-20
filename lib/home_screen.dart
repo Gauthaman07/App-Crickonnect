@@ -79,23 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : Column(
               children: [
-                // Full-Width Team Header Section (No margins/padding on sides)
+                // Team Header Section
                 if (teamData != null) ...[
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16), // Only horizontal padding for content
-                    margin: EdgeInsets.only(bottom: 20), // Only bottom margin
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      // Removed borderRadius and border for full-width effect
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     child: Row(
                       children: [
                         // Team Logo (Circular)
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(25),
                           child: Image.network(
                             teamData!['team']['teamLogo'] ?? "",
                             height: 50,
@@ -103,11 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                height: 60,
-                                width: 60,
+                                height: 50,
+                                width: 50,
                                 decoration: BoxDecoration(
                                   color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(25),
                                 ),
                                 child: Icon(
                                   Icons.sports_cricket,
@@ -122,28 +115,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Team Name
                         Expanded(
                           child: Text(
-                            (teamData!['team']['teamName'] ?? "My Team")
-                                .toUpperCase(), // Added .toUpperCase()
-                            style: TextStyle(
-                              fontSize: 16,
+                            (teamData!['team']['teamName'] ?? "My Team").toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
 
-                // Ground Availability Hero Banner (only for ground owners)
-                if (teamData != null && teamData!['team']['hasOwnGround'] == true) ...[
+                  // Thin Separator Line
                   Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Material(
-                      elevation: 8,
-                      borderRadius: BorderRadius.circular(16),
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    height: 1,
+                    color: Colors.grey[300],
+                  ),
+
+                  // Manage Schedule Section (only for ground owners)
+                  if (teamData!['team']['hasOwnGround'] == true) ...[
+                    Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -153,155 +149,232 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         },
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         child: Container(
-                          padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.green.shade600, Colors.blue.shade600],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          padding: EdgeInsets.all(16),
                           child: Row(
                             children: [
-                              Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.calendar_month,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                color: Colors.green[600],
+                                size: 24,
                               ),
                               SizedBox(width: 16),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Ground Availability',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      'Manage your weekly schedule & guest requests',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        color: Colors.white.withOpacity(0.9),
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'Manage Schedule',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
-                              Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.grey[600],
+                                size: 16,
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
 
 
-                // Cards Section with normal padding
+                // Grid Cards Section 
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0), // Only for cards
-                      child: Column(
-                        children: [
-                          CardWidget(
-                            title: "Book Matches",
-                            description: "Book grounds for your matches",
-                            imagePath: "assets/book.jpg",
-                            onTap: () {
-                              // Navigate to booking tab (Book Ground tab)
-                              widget.onNavigateToBookingTab(0);
-                            },
+                    child: Column(
+                      children: [
+                        // 2x2 Grid Layout
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          childAspectRatio: 0.85, // Adjust for card proportions
+                          crossAxisSpacing: 0,
+                          mainAxisSpacing: 0,
+                            children: [
+                              // Book Matches - Top Left
+                              _buildGridCard(
+                                title: "BOOK\nMatches",
+                                description: "",
+                                imagePath: "assets/book.jpg",
+                                onTap: () {
+                                  widget.onNavigateToBookingTab(0);
+                                },
+                              ),
+                              
+                              // Manage Requests - Top Right
+                              _buildGridCard(
+                                title: "MANAGE\nRequests",
+                                description: "",
+                                imagePath: "assets/team.jpg",
+                                onTap: () {
+                                  widget.onNavigateToBookingTab(1);
+                                },
+                              ),
+                              
+                              // Tournaments - Bottom Left
+                              _buildGridCard(
+                                title: "JOIN\nTournaments",
+                                description: "",
+                                imagePath: "assets/tr.jpg",
+                                onTap: () {
+                                  widget.onNavigateToTab(2);
+                                },
+                              ),
+                              
+                              // Create Tournament - Bottom Right
+                              _buildGridCard(
+                                title: "CREATE\nTournament",
+                                description: "",
+                                imagePath: "assets/book.jpg",
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CreateTournamentScreen(),
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Tournament created successfully!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 12),
-                          // Enhanced Manage Requests Card for Ground Owners
-                          CardWidget(
-                            title: teamData != null && teamData!['team']['hasOwnGround'] == true
-                                ? "Manage All Requests"
-                                : "Manage Requests",
-                            description: teamData != null && teamData!['team']['hasOwnGround'] == true
-                                ? "Handle booking & guest match requests"
-                                : "Handle ground booking requests",
-                            imagePath: "assets/team.jpg",
-                            onTap: () {
-                              // Navigate to booking tab (Ground Requests tab)
-                              widget.onNavigateToBookingTab(1);
-                            },
-                          ),
-
-                          SizedBox(height: 12),
-
-                          CardWidget(
-                            title: "Tournaments",
-                            description: "View and join tournaments",
-                            imagePath: "assets/tr.jpg",
-                            onTap: () {
-                              // Navigate to tournaments tab
-                              widget.onNavigateToTab(2);
-                            },
-                          ),
-                          SizedBox(height: 12),
-
-                          CardWidget(
-                            title: "Create Tournament",
-                            description: "Start your own tournament",
-                            imagePath: "assets/book.jpg",
-                            onTap: () async {
-                              // Navigate to create tournament screen
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CreateTournamentScreen(),
-                                ),
-                              );
-                              // Optional: Handle result if tournament was created
-                              if (result == true) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Tournament created successfully!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                          
-                          
                           SizedBox(height: 16), // Bottom spacing
                         ],
                       ),
                     ),
                   ),
-                ),
               ],
             ),
     );
+  }
+
+  // Grid Card Widget - Optimized for 2x2 grid layout
+  Widget _buildGridCard({
+    required String title,
+    required String description,
+    required String imagePath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        child: Stack(
+          children: [
+            // Background Image
+            Positioned.fill(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue.shade400,
+                          Colors.blue.shade600,
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.image,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  );
+                },
+              ),
+            ),
+            
+            // Dark Overlay for better text readability
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Text Overlay
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 24, // Moved up from bottom
+              child: RichText(
+                text: TextSpan(
+                  children: _buildTextSpans(title),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper function to build text spans with hierarchy
+  List<TextSpan> _buildTextSpans(String title) {
+    final lines = title.split('\n');
+    
+    if (lines.length >= 2) {
+      // Two-line format: First line (large, ALL CAPS), second line (smaller, normal case)
+      return [
+        TextSpan(
+          text: lines[0], // Main word (already in caps from title)
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+        TextSpan(
+          text: '\n${lines[1]}', // Secondary word
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.9),
+            letterSpacing: 0.2,
+          ),
+        ),
+      ];
+    } else {
+      // Single line fallback
+      return [
+        TextSpan(
+          text: title,
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ];
+    }
   }
 }
