@@ -35,8 +35,14 @@ class BottomNavBar extends StatelessWidget {
                   selectedItemColor: Colors.black,
                   unselectedItemColor: Colors.black,
                   showUnselectedLabels: true,
-                  selectedLabelStyle: TextStyle(color: Colors.black),
-                  unselectedLabelStyle: TextStyle(color: Colors.black),
+                  selectedLabelStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                  ),
+                  unselectedLabelStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                  ),
                   elevation: 0,
                   items: [
                     _buildAnimatedNavItem(
@@ -57,7 +63,7 @@ class BottomNavBar extends StatelessWidget {
                     (constraints.maxWidth / 4 - 60) / 2,
                 child: AnimatedContainer(
                   duration: Duration(milliseconds: 300),
-                  height: 3,
+                  height: 2,
                   width: 60,
                   decoration: BoxDecoration(
                     color: Colors.red,
@@ -82,7 +88,7 @@ class BottomNavBar extends StatelessWidget {
         child: Icon(
           currentIndex == index ? filledIcon : outlinedIcon,
           key: ValueKey<int>(index + (currentIndex == index ? 1 : 0)),
-          size: 22,
+          size: 20,
           color: Colors.black,
         ),
       ),

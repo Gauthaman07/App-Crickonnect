@@ -158,6 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     );
                   }),
+                  _buildNavigationSection("Logout", Icons.logout, () => _logout(context), isLogout: true),
                   if (isGroundOwner)
                     _buildNavigationSection("My Grounds", Icons.location_on, () {
                       Navigator.push(
@@ -165,8 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         MaterialPageRoute(builder: (context) => MyGroundsScreen()),
                       );
                     }),
-                  Spacer(), // Pushes logout button to the bottom
-                  _buildNavigationSection("Logout", Icons.logout, () => _logout(context), isLogout: true),
+                  Spacer(), // Pushes content to appropriate spacing
                 ],
               ),
             ),
@@ -191,14 +191,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Container(
                   padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isLogout ? Colors.black : Colors.white,
+                  decoration: isLogout ? BoxDecoration(
+                    color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
-                  ),
+                  ) : null,
                   child: Icon(
                     icon,
                     size: 20,
-                    color: isLogout ? Colors.white : Colors.black,
+                    color: isLogout ? Colors.white : Colors.grey.shade700,
                   ),
                 ),
                 SizedBox(width: 16),
